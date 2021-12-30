@@ -8,8 +8,8 @@ Only fits my configuration due to unidentifiable dom elements.
 Usage: 
 - Place Python files
 - Set web portal domain and user/password
-- Change code to extract needed dom data
-- start app.py or use systemd unit file
+- Change code to extract needed DOM data
+- start app.py or use systemd unit file on Linux
 - Listen to MQQT topic "swisstherm/#"
 - Set intervall with "30" to "swisstherm/delay" (seconds)
 - Stop scraping with "stop" to "swisstherm/onoff"
