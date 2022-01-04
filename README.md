@@ -13,4 +13,10 @@ Usage:
 - start app.py or use systemd unit file on Linux
 - Listen to MQQT topic "swisstherm/#"
 - Set intervall with "30" to "swisstherm/delay" (seconds)
-- Stop scraping with "stop" to "swisstherm/onoff"
+- Stop scraping with "stop" to "swisstherm/onoff" (no restart possible via mqtt)
+
+Info using systemd:
+- https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/
+- https://www.digitalocean.com/community/tutorials/what-is-systemd
+
+
