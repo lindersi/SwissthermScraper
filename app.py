@@ -142,7 +142,7 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
                 client.publish('swisstherm/'+key, payload=str(data[key]).replace(',','.'))
                 # print(f'{key:16}{data[key]}')
 
-            print(f'Daten abgerufen, Loop #{x}\n')
+            print(f'Loop {x} OK, {len(data)} items')
             abrufversuche = 0  # zurücksetzen, wenn alles ordentlich läuft
 
         break  # Damit nach ordentlichem Verlassen der inneren Schleife das Programm beendet wird
