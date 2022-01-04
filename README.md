@@ -7,7 +7,8 @@ Only fits my configuration due to unidentifiable DOM elements.
 
 Usage: 
 - Place Python files
-- Set web portal domain and user/password
+- Set web portal domain and user/password 
+  (in secrets.py which is for security reasons not part of the repo)
 - Set MQQT host
 - Change code to extract needed DOM data
 - start app.py or use systemd unit file on Linux
