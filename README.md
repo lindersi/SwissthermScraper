@@ -20,4 +20,17 @@ Info using systemd:
 - https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/
 - https://www.digitalocean.com/community/tutorials/what-is-systemd
 
+Recommended unit file:
+```
+[Unit]
+Description=Swisstherm-Scraper
+Wants=network-online.target
+After=network-online.target
 
+[Service]
+Type=idle
+ExecStart=/usr/bin/python /home/pi/python-projects/SwissthermScraper/app.py  > /home/pi/swisstherm.log
+
+[Install]
+WantedBy=multi-user.target
+```
