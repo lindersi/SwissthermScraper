@@ -85,7 +85,7 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
         #    raise TimeoutError('Test')  # zum Testen des Fehlerfalls
 
         #  Betriebsdaten Heizkreisübersicht
-        driver.get(secrets.datapath)
+        driver.get(secrets.portal_datapath)
 
         element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, 'div.overlay'))
