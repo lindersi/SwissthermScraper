@@ -15,6 +15,7 @@ Usage:
 - Listen to MQQT topic "swisstherm/#"
 - Set intervall with "30" to "swisstherm/delay" (seconds)
 - Stop scraping with "stop" to "swisstherm/onoff" (no restart possible via mqtt)
+- Receive Status on "swisstherm/status" (only start and errors)
 
 Info using systemd:
 - https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/
