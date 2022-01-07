@@ -1,6 +1,8 @@
 # SwissthermScraper
 Scraping swisstherm/kermi/pzp heatpump data from the web portal and send through mqtt. Uses Python3, Selenium with Chromium, Paho MQTT.
 
+Currently my only way to get my data for using in Homeassistant.
+
 Only fits my configuration due to unidentifiable DOM elements.
 
 Created with almost no python knowledge. Hints for improvement are highly appreciated.
@@ -11,7 +13,7 @@ Usage:
 - Place Python files
 - Set web portal domain and user/password 
   (in secrets.py which is for security reasons not part of the repo)
-- Set MQTT host
+- Set MQTT host and credentials
 - Change code to extract needed DOM data
 - start app.py or use systemd unit file on Linux
 - Listen to MQTT topic "swisstherm/#"
