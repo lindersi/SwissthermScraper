@@ -50,7 +50,7 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
 
         control = {
             'onoff': '',
-            'delay': 60  # Sekunden (Intervall Datenabruf)
+            'delay': 30  # Sekunden (Intervall Datenabruf)
         }
 
         # The callback for when a PUBLISH message is received from the server.
@@ -75,8 +75,6 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
         # manual interface.
         client.loop_start()
 
-        data = {}
-
         print('Laden...')
 
         element = WebDriverWait(driver, 20).until(
@@ -94,13 +92,24 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
         )
         time.sleep(5)
 
+        data = {}
+        refresh_check = {
+            'count': 0,
+            'value': ""
+        }
+
         x = 0
         while control['onoff'] != "stop":  # Endlosschleife mit "while True" oder begrenzt mit "while x in range(n)>"
             if x > 0:
                 time.sleep(int(control['delay']))
+            else:
+                client.publish('swisstherm/status', payload='Abfrage gestartet')
             x += 1
 
             values = driver.find_elements(By.CSS_SELECTOR, 'div.row.g-g > div > div')
+
+            refresh_check['value'] = data.get("Zustand seit")  # Speichern des letzten Werts für die Aktualisierungs-Prüfung.
+            refresh_check['count'] = 0
 
             linke_zeilen = values[0].text.split('\n')
             heizleistung = linke_zeilen[0].split(': ')
@@ -115,6 +124,13 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
             # raise IndexError('Test')  # Zum Testen des Fehlerfalls
 
             data["Zustand seit"] = values[1].text.strip()
+
+            # Prüfung, ob Daten auf Webseite noch aktualisiert werden. Sonst Neustart.
+            if data["Zustand seit"] == refresh_check['value']:
+                refresh_check['count'] += 1
+                if refresh_check['count'] * control['delay'] >= 120:
+                    client.publish('swisstherm/status', payload='Daten nicht aktualisiert - Neustart...')
+                    raise IndexError('Daten nicht aktualisiert - Neustart...')
 
             rechte_zeilen = values[2].text.split('\n')
             aussentemp = rechte_zeilen[0].split(': ')
@@ -149,6 +165,7 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
 
     except:
         print(f'Fehler beim Abruf der Swisstherm-Heizkreisdaten (Versuch {abrufversuche}): ', sys.exc_info())
+        client.publish('swisstherm/status', payload=f'Fehler beim Abruf der Swisstherm-Heizkreisdaten (Versuch {abrufversuche}): {sys.exc_info()}')
 
     driver.close()
     client.loop_stop()
