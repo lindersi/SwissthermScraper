@@ -9,10 +9,10 @@ Usage:
 - Place Python files
 - Set web portal domain and user/password 
   (in secrets.py which is for security reasons not part of the repo)
-- Set MQQT host
+- Set MQTT host
 - Change code to extract needed DOM data
 - start app.py or use systemd unit file on Linux
-- Listen to MQQT topic "swisstherm/#"
+- Listen to MQTT topic "swisstherm/#"
 - Set intervall with "30" to "swisstherm/delay" (seconds)
 - Stop scraping with "stop" to "swisstherm/onoff" (no restart possible via mqtt)
 - Receive Status on "swisstherm/status" (only start and errors)
