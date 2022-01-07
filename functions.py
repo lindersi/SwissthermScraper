@@ -3,16 +3,16 @@ from selenium.webdriver.common.by import By
 import secrets
 
 def login(driver):
-    driver.get(secrets.loginpath)
+    driver.get(secrets.portal_loginpath)
     print('Anmelden...')
 
     assert "Swisstherm" in driver.title
     elem = driver.find_element(By.NAME, "UserName")
     elem.clear()
-    elem.send_keys(secrets.user)
+    elem.send_keys(secrets.portal_user)
     elem = driver.find_element(By.NAME, "Password")
     elem.clear()
-    elem.send_keys(secrets.password)
+    elem.send_keys(secrets.portal_password)
     elem.send_keys(Keys.RETURN)
 
 
