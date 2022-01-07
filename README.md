@@ -1,5 +1,5 @@
 # SwissthermScraper
-Scraping swisstherm/kermi/pzp heatpump data from the web portal and send through mqqt. Uses Python3, Selenium with Chromium, Paho MQTT.
+Scraping swisstherm/kermi/pzp heatpump data from the web portal and send through mqtt. Uses Python3, Selenium with Chromium, Paho MQTT.
 
 Only fits my configuration due to unidentifiable DOM elements.
 
