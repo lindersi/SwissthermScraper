@@ -65,9 +65,9 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
         client = mqtt.Client()
         client.on_connect = on_connect
         client.on_message = on_message
-        client.username_pw_set('hassmqtt', password='54b6605dd6')
+        client.username_pw_set(secrets.mqtt_user, password=secrets.mqtt_pwd)
 
-        client.connect("homeassistant", 1883, 60)
+        client.connect(secrets.mqtt_host, secrets.mqtt_port, 60)
 
         # Blocking call that processes network traffic, dispatches callbacks and
         # handles reconnecting.
