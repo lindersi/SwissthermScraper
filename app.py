@@ -81,9 +81,6 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
             EC.presence_of_element_located((By.CSS_SELECTOR, 'div.main'))
         )
 
-        # if abrufversuche > 2:
-        #    raise TimeoutError('Test')  # zum Testen des Fehlerfalls
-
         #  Betriebsdaten Heizkreisübersicht
         driver.get(secrets.datapath)
 
