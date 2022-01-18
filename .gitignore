@@ -1,6 +1,8 @@
 # Eigene #
 ##########
 secrets.py
+unit-files
+__pycache__
 
 # Compiled source #
 ###################
