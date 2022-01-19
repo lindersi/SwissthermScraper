@@ -97,6 +97,9 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
 
         x = 0
         while control['onoff'] != "stop":  # Endlosschleife mit "while True" oder begrenzt mit "while x in range(n)>"
+            if control['onoff'] == "restart":
+                client.publish('swisstherm/status', payload='Neustart angefordert...')
+                raise InterruptedError('Neustart angefordert...')
             if x > 0:
                 time.sleep(int(control['delay']))
             else:
@@ -106,7 +109,6 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
             values = driver.find_elements(By.CSS_SELECTOR, 'div.row.g-g > div > div')
 
             refresh_check['value'] = data.get("Zustand seit")  # Speichern des letzten Werts für die Aktualisierungs-Prüfung.
-            refresh_check['count'] = 0
 
             linke_zeilen = values[0].text.split('\n')
             heizleistung = linke_zeilen[0].split(': ')
@@ -127,8 +129,9 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
                 refresh_check['count'] += 1
                 if refresh_check['count'] * control['delay'] >= 120:
                     client.publish('swisstherm/status', payload='Daten nicht aktualisiert - Neustart...')
-                    raise IndexError('Daten nicht aktualisiert - Neustart...')
-
+                    raise ConnectionError('Daten nicht aktualisiert - Neustart...')
+            else:
+                refresh_check['count'] = 0
             rechte_zeilen = values[2].text.split('\n')
             aussentemp = rechte_zeilen[0].split(': ')
             data[aussentemp[0].replace('Außentemperatur', 'Aussentemp.')] = aussentemp[1].split(' ')[0]
@@ -154,6 +157,7 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
             for key in data:
                 client.publish('swisstherm/'+key, payload=str(data[key]).replace(',','.'))
                 # print(f'{key:16}{data[key]}')
+            client.publish('swisstherm/status', payload=f'Loop {x} OK, {len(data)} items, delay={control["delay"]}s, refresh_check={refresh_check["count"]}')
 
             print(f'Loop {x} OK, {len(data)} items')
             abrufversuche = 0  # zurücksetzen, wenn alles ordentlich läuft

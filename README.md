@@ -25,8 +25,9 @@ Usage:
 - start app.py or use systemd unit file on Linux
 - Listen to MQTT topic "swisstherm/#"
 - Set intervall with "30" to "swisstherm/delay" (seconds)
-- Stop scraping with "stop" to "swisstherm/onoff" (no restart possible via mqtt)
-- Receive Status on "swisstherm/status" (only start and errors)
+- Stop scraping with "stop" to "swisstherm/onoff" (no start possible via MQTT)
+- Restart with "restart" to "swisstherm/onoff"
+- Receive Status on "swisstherm/status"
 
 Info using systemd:
 - https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/
