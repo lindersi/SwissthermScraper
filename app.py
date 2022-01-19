@@ -62,7 +62,7 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
             if msg.topic == "swisstherm/control/onoff":
                  control['onoff'] = received
             if msg.topic == "swisstherm/control/delay":
-                 control['delay'] = received
+                 control['delay'] = int(received)
             print(msg.topic + " " + received)
 
         client = mqtt.Client()
@@ -130,7 +130,7 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
             # Prüfung, ob Daten auf Webseite noch aktualisiert werden. Sonst Neustart.
             if data["Zustand seit"] == refresh_check['value']:
                 refresh_check['count'] += 1
-                if refresh_check['count'] * control['delay'] >= 120:
+                if refresh_check['count'] * int(control['delay']) >= 120:
                     client.publish('swisstherm/status', payload='Daten nicht aktualisiert - Neustart...')
                     raise ConnectionError('Daten nicht aktualisiert - Neustart...')
             else:
@@ -160,7 +160,7 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
             for key in data:
                 client.publish('swisstherm/'+key, payload=str(data[key]).replace(',','.'))
                 # print(f'{key:16}{data[key]}')
-            client.publish('swisstherm/status', payload=f'Loop {x} OK, {len(data)} items sent from {host}, delay={control["delay"]}s, refresh_check={refresh_check["count"]}')
+            client.publish('swisstherm/status', payload=f'Loop {x}, {len(data)} items sent from {host}, delay={control["delay"]}s, refresh_check={refresh_check["count"]}')
 
             print(f'Loop {x} OK, {len(data)} items')
             abrufversuche = 0  # zurücksetzen, wenn alles ordentlich läuft
@@ -172,6 +172,7 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
         client.publish('swisstherm/status', payload=f'Fehler beim Abruf der Swisstherm-Heizkreisdaten (Versuch {abrufversuche}): {sys.exc_info()}')
 
     driver.close()
+    client.publish('swisstherm/status', payload='Abruf Swisstherm-Heizkreisdaten wurde beendet.')
     client.loop_stop()
 
 print('Abruf Swisstherm-Heizkreisdaten wurde beendet.')
