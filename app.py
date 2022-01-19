@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import datetime
 import sys
+import socket
 
 import functions
 import secrets
@@ -29,6 +30,8 @@ options.add_argument("--start-maximized")
 options.add_argument('--disable-gpu')
 options.add_argument('--disable-dev-shm-usage')
 options.add_argument('--no-sandbox')
+
+host = socket.gethostname()
 
 abrufversuche = 0
 for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
@@ -157,7 +160,7 @@ for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
             for key in data:
                 client.publish('swisstherm/'+key, payload=str(data[key]).replace(',','.'))
                 # print(f'{key:16}{data[key]}')
-            client.publish('swisstherm/status', payload=f'Loop {x} OK, {len(data)} items, delay={control["delay"]}s, refresh_check={refresh_check["count"]}')
+            client.publish('swisstherm/status', payload=f'Loop {x} OK, {len(data)} items sent from {host}, delay={control["delay"]}s, refresh_check={refresh_check["count"]}')
 
             print(f'Loop {x} OK, {len(data)} items')
             abrufversuche = 0  # zurücksetzen, wenn alles ordentlich läuft
