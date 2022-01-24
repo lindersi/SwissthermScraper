@@ -5,8 +5,9 @@ Currently my only way to get my own data to use in Homeassistant, because I didn
 
 Only fits my configuration due to unidentifiable DOM elements (but is easily changeable).
 
-Created with very little coding knowledge. Hints for improvement are highly appreciated.
+Created with little coding knowledge. Hints for improvement are highly appreciated.
 
+Where data is scraped from:
 ![grafik](https://user-images.githubusercontent.com/76875781/147733333-31de635b-6b2e-4d15-adb4-5873575ca2ed.png)
 
 Prerequisites:
