@@ -36,7 +36,8 @@ host = socket.gethostname()
 abrufversuche = 0
 for abrufversuche in range(10):  # Anzahl Versuche im Fehlerfall
 
-    time.sleep(300)
+    if abrufversuche > 0:
+        time.sleep(300)
     abrufversuche += 1
 
     try:
