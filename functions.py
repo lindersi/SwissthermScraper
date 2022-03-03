@@ -1,11 +1,12 @@
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import secrets
+import time
 
 def login(driver):
     driver.get(secrets.portal_loginpath)
     print('Anmelden...')
-
+    time.sleep(5)
     assert "Swisstherm" in driver.title
     elem = driver.find_element(By.NAME, "UserName")
     elem.clear()

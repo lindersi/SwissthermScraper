@@ -34,9 +34,9 @@ options.add_argument('--no-sandbox')
 host = socket.gethostname()
 
 abrufversuche = 0
-for abrufversuche in range(5):  # Anzahl Versuche im Fehlerfall
+for abrufversuche in range(10):  # Anzahl Versuche im Fehlerfall
 
-    time.sleep(abrufversuche * 30)
+    time.sleep(300)
     abrufversuche += 1
 
     try:
