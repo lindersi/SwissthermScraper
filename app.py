@@ -172,7 +172,11 @@ for abrufversuche in range(10):  # Anzahl Versuche im Fehlerfall
         print(f'Fehler beim Abruf der Swisstherm-Heizkreisdaten (Versuch {abrufversuche}): ', sys.exc_info())
         client.publish('swisstherm/status', payload=f'Fehler beim Abruf der Swisstherm-Heizkreisdaten (Versuch {abrufversuche}): {sys.exc_info()}')
 
-    driver.close()
+    try:
+        driver.close()
+    except:
+        print(f'Fehler: Chromium konnte nicht beendet werden. Weiter...')
+        client.publish('swisstherm/status', payload=f'Fehler: Chromium konnte nicht beendet werden. Weiter...')
     client.publish('swisstherm/status', payload='Abruf Swisstherm-Heizkreisdaten wurde beendet.')
     client.loop_stop()
 
