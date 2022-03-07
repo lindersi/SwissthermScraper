@@ -143,9 +143,9 @@ for abrufversuche in range(10):  # Anzahl Versuche im Fehlerfall
             data[wpzustand[0].replace('Wärmepumpenzustand', 'WP-Zustand')] = wpzustand[1]
 
             values = driver.find_elements(By.CSS_SELECTOR, 'div.overlay span')
-            keys = ["Heizkreis", "Vorlauf", "Rücklauf", "Mischer", "Modus", "Ventil",
+            keys = ["Heizkreis", "Vorlauf Soll", "Vorlauf Ist", "Mischer", "Modus", "Ventil",
                     "WP Rückl.", "WP Vorl.", "WP Umwälz", "WP UW Öffn", "WP UW Hyst", "WP UW Flow",
-                    "TWE Max", "TWE Ist", "TWE Hyst", "Puffer Max", "Puffer Ist", "Puffer Hyst"]
+                    "TWE Soll", "TWE Ist", "TWE Hyst", "Puffer Soll", "Puffer Ist", "Puffer Hyst"]
             i = 0
             for key in keys:
                 data[key] = values[i].text.split(' ')[0]
