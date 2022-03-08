@@ -194,6 +194,10 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
 
         break  # Damit nach ordentlichem Verlassen der inneren Schleife das Programm beendet wird
 
+    except KeyboardInterrupt:
+        client.publish('swisstherm/status', payload=f'Abruf der Swisstherm-Heizkreisdaten manuell abgebrochen')
+        sys.exit(0)
+
     except:
         print(f'Fehler beim Abruf der Swisstherm-Heizkreisdaten (Versuch {abrufversuche}): ', sys.exc_info())
         client.publish('swisstherm/status', payload=f'Fehler beim Abruf der Swisstherm-Heizkreisdaten (Versuch {abrufversuche}): {sys.exc_info()}')
