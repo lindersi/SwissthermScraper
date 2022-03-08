@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 import secrets
 import time
 
+
 def login(driver):
     driver.get(secrets.portal_loginpath)
     print('Anmelden...')
@@ -35,3 +36,4 @@ def writefile(data):
         f.write('\n')
         f.close()
     print(f'Data written to {filename}\n')
+
