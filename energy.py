@@ -14,7 +14,7 @@ import secrets
 
 def energiezaehler(options, client):
 
-    client.publish('swisstherm/status/zaehler', payload='Abruf Swisstherm-Zählerstände läuft...')
+    client.publish('swisstherm/status', payload='Abruf Swisstherm-Zählerstände läuft...')
     print('Abruf Swisstherm-Zählerstände läuft...')
 
     try:
@@ -25,6 +25,7 @@ def energiezaehler(options, client):
 
             functions.login(driver)  # Anmelden mit separater Funktion
             print(f'Laden Zähler {zaehlerwahl}...')
+            client.publish('swisstherm/status', payload=f'Laden Zähler {zaehlerwahl}...')
 
             element = WebDriverWait(driver, 20).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, 'div.main'))
