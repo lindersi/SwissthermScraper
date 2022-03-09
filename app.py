@@ -12,6 +12,7 @@ import sys
 import socket
 
 import functions
+import energy
 import secrets
 import paho.mqtt.client as mqtt
 
@@ -31,6 +32,9 @@ def on_connect(client, userdata, flags, rc):
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     received = str(msg.payload.decode("utf-8"))
+    print(msg.topic + " " + received)
+    if msg.topic == "swisstherm/control/zaehler" and received == "get":
+        energy.energiezaehler(options, client)
     if msg.topic == "swisstherm/control/onoff":
         control['onoff'] = received
     if msg.topic == "swisstherm/control/delay":
@@ -39,7 +43,6 @@ def on_message(client, userdata, msg):
         control['waittime'] = int(received)
     if msg.topic == "swisstherm/control/retries":
         control['retries'] = int(received)
-    print(msg.topic + " " + received)
 
 
 client = mqtt.Client()
@@ -57,7 +60,7 @@ client.loop_start()
 
 control = {
     'onoff': '',
-    'delay': 30,  # Sekunden (Intervall Datenabruf)
+    'delay': 300,  # Sekunden (Intervall Datenabruf)
     'waittime': 5,  # Minuten zwischen Abrufversuchen, resp. Neuverbindungen mit dem Swisstherm-Portal
     'retries' : 10  # Anzahl Neuverbindungs-Versuche vor Programmabbruch
 }
