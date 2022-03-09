@@ -60,7 +60,7 @@ client.loop_start()
 
 control = {
     'onoff': '',
-    'delay': 300,  # Sekunden (Intervall Datenabruf)
+    'delay': 30,  # Sekunden (Intervall Datenabruf)
     'waittime': 5,  # Minuten zwischen Abrufversuchen, resp. Neuverbindungen mit dem Swisstherm-Portal
     'retries' : 10  # Anzahl Neuverbindungs-Versuche vor Programmabbruch
 }
