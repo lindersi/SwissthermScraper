@@ -7,7 +7,7 @@ import time
 def login(driver):
     driver.get(secrets.portal_loginpath)
     print('Anmelden...')
-    time.sleep(2)
+    time.sleep(5)
     assert "Swisstherm" in driver.title
     elem = driver.find_element(By.NAME, "UserName")
     elem.clear()
