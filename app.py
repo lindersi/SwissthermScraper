@@ -80,7 +80,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
                  "Chrome/96.0.4664.45 Safari/537.36"
 
     options = webdriver.ChromeOptions()
-    options.headless = True
+    options.headless = False
     options.add_argument(f'user-agent={user_agent}')
     options.add_argument("--window-size=1024,768")
     options.add_argument('--ignore-certificate-errors')
@@ -114,7 +114,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
         )
 
         #  Betriebsdaten Heizkreisübersicht
-        driver.get(secrets.portal_datapath)
+        driver.get(secrets.portal_datapath['Heizkreis'])
 
         element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, 'div.overlay'))
