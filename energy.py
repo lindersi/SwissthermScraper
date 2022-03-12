@@ -80,7 +80,7 @@ def energiezaehler(options, client):
     gsheet.main(data)
 
 
-def write_data:
+def write_data():
     file = open("energy-data.txt", "w")
     file.write(json.dumps(data))
     file.close()
