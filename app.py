@@ -80,7 +80,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
                  "Chrome/96.0.4664.45 Safari/537.36"
 
     options = webdriver.ChromeOptions()
-    options.headless = False
+    options.headless = True
     options.add_argument(f'user-agent={user_agent}')
     options.add_argument("--window-size=1024,768")
     options.add_argument('--ignore-certificate-errors')
