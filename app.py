@@ -35,6 +35,7 @@ def on_message(client, userdata, msg):
     print(msg.topic + " " + received)
     if msg.topic == "swisstherm/control/zaehler" and received == "get":
         energy.energiezaehler(options, client)
+        client.publish('Abruf Energiezähler ausgelöst')
     if msg.topic == "swisstherm/control/onoff":
         control['onoff'] = received
     if msg.topic == "swisstherm/control/delay":
