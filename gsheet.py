@@ -46,6 +46,7 @@ def main(data, client):
                                     range=RANGE_NAME).execute()
         values = result.get('values', [])
 
+        x = 0
         for x in range(20):
             if "Datum" in values[x]:
                 break
@@ -76,7 +77,8 @@ def main(data, client):
 
     except:
         print(f'Fehler beim Anmelden/Schreiben in Google Sheets: ', sys.exc_info())
-        client.publish('swisstherm/status', payload=f'Notify: Fehler beim Anmelden/Schreiben in Google Sheets: {sys.exc_info()}')
+        client.publish('swisstherm/status',
+                       payload=f'Notify: Fehler beim Anmelden/Schreiben in Google Sheets: {sys.exc_info()}')
 
 
 def get_data():
@@ -85,6 +87,3 @@ def get_data():
     for item in data:
         print(f'{item:24}{data[item]}')
     return data
-
-if __name__ == '__main__':
-    main([])

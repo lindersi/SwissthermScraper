@@ -1,11 +1,12 @@
 # Gemäss https://selenium-python.readthedocs.io - leicht ergänzt
 # Funktionierende Abfrage - ohne executable_path-Warnung und headless gem. https://youtu.be/LN1a0JoKlX8
-# Nach wiederholten Hängern (Fehler mit Selenium/Driver) umgebaut (Selenium komplett in Loop, MQTT ausserhalb mit mehr Statusmeldungen).
+# Nach wiederholten Hängern (Fehler mit Selenium/Driver) umgebaut
+# (Selenium komplett in Loop, MQTT ausserhalb mit mehr Statusmeldungen).
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 import time
 import datetime
 import sys
@@ -34,8 +35,8 @@ def on_message(client, userdata, msg):
     received = str(msg.payload.decode("utf-8"))
     print(msg.topic + " " + received)
     if msg.topic == "swisstherm/control/zaehler" and received == "get":
-        energy.energiezaehler(options, client)
         client.publish('Abruf Energiezähler ausgelöst')
+        energy.energiezaehler(options, client)
     if msg.topic == "swisstherm/control/onoff":
         control['onoff'] = received
     if msg.topic == "swisstherm/control/delay":
@@ -68,7 +69,8 @@ control = {
 
 host = socket.gethostname()
 
-client.publish('swisstherm/status', payload=f'Swisstherm-Scraper gestartet auf {host}, Abrufintervall (delay): {control["delay"]}s')
+client.publish('swisstherm/status',
+               payload=f'Swisstherm-Scraper gestartet auf {host}, Abrufintervall (delay): {control["delay"]}s')
 
 
 # ------------------------------------------------------
@@ -94,7 +96,6 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--no-sandbox')
 
-
     if abrufversuche > 0:
         wartezeit = int(control['waittime'])
         time.sleep(wartezeit * 60)
@@ -103,22 +104,22 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
 
     abrufversuche += 1
 
+    driver = webdriver.Chrome(options=options)
     try:
-        driver = webdriver.Chrome(options=options)
         functions.login(driver)  # Anmelden mit separater Funktion
 
         print('Laden...')
         client.publish('swisstherm/status', payload=f'Anmeldung erfolgreich. Seite laden...')
 
         element = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, 'div.main'))
+            ec.presence_of_element_located((By.CSS_SELECTOR, 'div.main'))
         )
 
         #  Betriebsdaten Heizkreisübersicht
         driver.get(secrets.portal_datapath['Heizkreis'])
 
-        element = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, 'div.overlay'))
+        WebDriverWait(driver, 10).until(
+            ec.presence_of_element_located((By.CSS_SELECTOR, 'div.overlay'))
         )
         time.sleep(5)
 
@@ -141,7 +142,8 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
 
             values = driver.find_elements(By.CSS_SELECTOR, 'div.row.g-g > div > div')
 
-            refresh_check['value'] = data.get("Zustand seit")  # Speichern des letzten Werts für die Aktualisierungs-Prüfung.
+            refresh_check['value'] = data.get("Zustand seit")
+            # Speichern des letzten Werts für die Aktualisierungs-Prüfung.
 
             linke_zeilen = values[0].text.split('\n')
             heizleistung = linke_zeilen[0].split(': ')
@@ -189,9 +191,11 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
             # functions.writefile(data)
 
             for key in data:
-                client.publish('swisstherm/'+key, payload=str(data[key]).replace(',','.'))
+                client.publish('swisstherm/'+key, payload=str(data[key]).replace(',', '.'))
                 # print(f'{key:16}{data[key]}')
-            client.publish('swisstherm/status', payload=f'Loop {x}, {len(data)} items sent from {host}, delay={control["delay"]}s, refresh_check={refresh_check["count"]}')
+            client.publish('swisstherm/status',
+                           payload=f'Loop {x}, {len(data)} items sent from {host}, '
+                                   f'delay={control["delay"]}s, refresh_check={refresh_check["count"]}')
 
             print(f'Loop {x} OK, {len(data)} items')
             abrufversuche = 0  # zurücksetzen, wenn alles ordentlich läuft
@@ -204,7 +208,9 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
 
     except:
         print(f'Fehler beim Abruf der Swisstherm-Heizkreisdaten (Versuch {abrufversuche}): ', sys.exc_info())
-        client.publish('swisstherm/status', payload=f'Fehler beim Abruf der Swisstherm-Heizkreisdaten (Versuch {abrufversuche}): {sys.exc_info()}')
+        client.publish('swisstherm/status',
+                       payload=f'Fehler beim Abruf der Swisstherm-Heizkreisdaten '
+                               f'(Versuch {abrufversuche}): {sys.exc_info()}')
 
     try:
         driver.close()

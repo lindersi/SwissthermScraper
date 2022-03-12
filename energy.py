@@ -72,16 +72,16 @@ def energiezaehler(options, client):
 
     except:
         print(f'Fehler beim Abruf der Swisstherm-Energiezähler: ', sys.exc_info())
-        client.publish('swisstherm/status', payload=f'Notify: Fehler beim Abruf der Swisstherm-Energiezähler: {sys.exc_info()}')
+        client.publish('swisstherm/status',
+                       payload=f'Notify: Fehler beim Abruf der Swisstherm-Energiezähler: {sys.exc_info()}')
 
-    print('Abruf Swisstherm-Energiezähler wurde beendet.')
-    client.publish('swisstherm/status', payload='Notify: Abruf Swisstherm-Energiezähler wurde beendet.')
+    print('Swisstherm-Energiezähler erfolgreich abgerufen.')
+    client.publish('swisstherm/status', payload='Notify: Swisstherm-Energiezähler erfolgreich abgerufen.')
 
     gsheet.main(data, client)
 
 
-def write_data():
+def write_data(data):
     file = open("energy-data.txt", "w")
     file.write(json.dumps(data))
     file.close()
-
