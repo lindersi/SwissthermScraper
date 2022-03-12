@@ -46,11 +46,16 @@ def energiezaehler(options, client):
 
             values = driver.find_elements(By.CSS_SELECTOR, 'div.row.g-g > div > div')
 
-            assert values[6].text.split(" ")[0] == "Wärmemenge", "Werte nicht gefunden."
-            data[values[6].text] = values[7].text.split(" ")[0]  # Wärmemenge Hz / TWE
-            data[values[10].text] = values[11].text.split(" ")[0]  # Leistungsaufnahme Hz /  TWE
-            data[values[14].text] = values[15].text  # Gemittelter COP Hz / TWE
-            data[values[18].text] = values[19].text.split(" ")[0]  # Betriebsminuten Hz / TWE
+            if "Wärmemenge" in values[6].text.split(" ")[0]:
+                data[values[6].text] = values[7].text.split(" ")[0]  # Wärmemenge Gesamt / Hz / TWE
+                data[values[10].text] = values[11].text.split(" ")[0]  # Leistungsaufnahme Gesamt / Hz /  TWE
+                data[values[14].text] = values[15].text  # Gemittelter COP Gesamt / Hz / TWE
+                data[values[18].text] = values[19].text.split(" ")[0]  # Betriebsminuten Gesamt / Hz / TWE
+            elif "Betriebsstunden" in values[6].text.split(" ")[0]:
+                data[values[22].text] = values[23].text.split(" ")[0]  # Betriebsstunden ext. WEZ 1
+                data[values[26].text] = values[27].text.split(" ")[0]  # Betriebsstunden ext. WEZ 2
+            else:
+                raise ValueError
 
             driver.close()
             driver.switch_to.window(startfenster)
@@ -62,6 +67,8 @@ def energiezaehler(options, client):
             client.publish('swisstherm/zaehler/'+key, payload=str(data[key]).replace(',', '.'))
             print(f'{key:16}{data[key]}')
         client.publish('swisstherm/status', payload=f'Zähler abgerufen ({len(data)} Werte).')
+
+        driver.quit()
 
     except:
         print(f'Fehler beim Abruf der Swisstherm-Energiezähler: ', sys.exc_info())
@@ -76,4 +83,4 @@ def energiezaehler(options, client):
 
     time.sleep(3)
 
-    gsheet.get_data()  # Test: Auslesen der im txt-file gespeicherten Daten
+    gsheet.main(data)  # Test: Auslesen der im txt-file gespeicherten Daten
