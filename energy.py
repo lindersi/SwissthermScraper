@@ -77,10 +77,11 @@ def energiezaehler(options, client):
     print('Abruf Swisstherm-Energiezähler wurde beendet.')
     client.publish('swisstherm/status', payload='Notify: Abruf Swisstherm-Energiezähler wurde beendet.')
 
+    gsheet.main(data)
+
+
+def write_data:
     file = open("energy-data.txt", "w")
     file.write(json.dumps(data))
     file.close()
 
-    time.sleep(3)
-
-    gsheet.main(data)  # Test: Auslesen der im txt-file gespeicherten Daten
