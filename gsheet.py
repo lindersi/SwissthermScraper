@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import os.path
 import json
+import sys
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -17,7 +18,7 @@ SPREADSHEET_ID = '1Pny7iRRp4aL3n-oTF155LaL44Wf4mf7ZcZhidHeyqik'
 RANGE_NAME = 'Energieverbrauch!A:G'
 
 
-def main(data):
+def main(data, client):
     try:
         creds = None
         # The file token.json stores the user's access and refresh tokens, and is

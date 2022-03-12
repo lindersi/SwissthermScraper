@@ -77,7 +77,7 @@ def energiezaehler(options, client):
     print('Abruf Swisstherm-Energiezähler wurde beendet.')
     client.publish('swisstherm/status', payload='Notify: Abruf Swisstherm-Energiezähler wurde beendet.')
 
-    gsheet.main(data)
+    gsheet.main(data, client)
 
 
 def write_data():
