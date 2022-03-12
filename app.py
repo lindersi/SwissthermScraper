@@ -12,7 +12,7 @@ import sys
 import socket
 
 import functions
-import energy
+# import energy  # Macht auf PythonPi als Service Probleme "ModuleNotFoundError: No module named 'google'". Funktioniert aber auf Simu-Dell und auf PythonPi im Debug-Modus.
 import secrets
 import paho.mqtt.client as mqtt
 
@@ -34,7 +34,8 @@ def on_message(client, userdata, msg):
     received = str(msg.payload.decode("utf-8"))
     print(msg.topic + " " + received)
     if msg.topic == "swisstherm/control/zaehler" and received == "get":
-        energy.energiezaehler(options, client)
+        # energy.energiezaehler(options, client)
+        client.publish('swisstherm/status', payload=f'Energy funktioniert auf PythonPi als Service wegen "google-Modul" noch nicht... Sorry.')
     if msg.topic == "swisstherm/control/onoff":
         control['onoff'] = received
     if msg.topic == "swisstherm/control/delay":
@@ -62,7 +63,7 @@ control = {
     'onoff': '',
     'delay': 30,  # Sekunden (Intervall Datenabruf)
     'waittime': 5,  # Minuten zwischen Abrufversuchen, resp. Neuverbindungen mit dem Swisstherm-Portal
-    'retries' : 10  # Anzahl Neuverbindungs-Versuche vor Programmabbruch
+    'retries': 10  # Anzahl Neuverbindungs-Versuche vor Programmabbruch
 }
 
 host = socket.gethostname()
