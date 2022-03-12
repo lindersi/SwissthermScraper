@@ -12,7 +12,7 @@ import sys
 import socket
 
 import functions
-# import energy  # Macht auf PythonPi als Service Probleme "ModuleNotFoundError: No module named 'google'". Funktioniert aber auf Simu-Dell und auf PythonPi im Debug-Modus.
+import energy
 import secrets
 import paho.mqtt.client as mqtt
 
@@ -34,8 +34,7 @@ def on_message(client, userdata, msg):
     received = str(msg.payload.decode("utf-8"))
     print(msg.topic + " " + received)
     if msg.topic == "swisstherm/control/zaehler" and received == "get":
-        # energy.energiezaehler(options, client)
-        client.publish('swisstherm/status', payload=f'Energy funktioniert auf PythonPi als Service wegen "google-Modul" noch nicht... Sorry.')
+        energy.energiezaehler(options, client)
     if msg.topic == "swisstherm/control/onoff":
         control['onoff'] = received
     if msg.topic == "swisstherm/control/delay":
@@ -213,5 +212,6 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
         client.publish('swisstherm/status', payload=f'Fehler: Chromium konnte nicht beendet werden. Weiter...')
 
 print('Abruf Swisstherm-Heizkreisdaten wurde beendet.')
-client.publish('swisstherm/status', payload='Abruf Swisstherm-Heizkreisdaten wurde beendet.')
+client.publish('swisstherm/status', payload=f'Notify: Abruf Swisstherm-Heizkreisdaten von {host} wurde beendet.')
+# Meldungen mit Stichwort "Notify: " werden von Home Assistant weiter geleitet!
 client.loop_stop()

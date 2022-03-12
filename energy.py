@@ -72,10 +72,10 @@ def energiezaehler(options, client):
 
     except:
         print(f'Fehler beim Abruf der Swisstherm-Energiezähler: ', sys.exc_info())
-        client.publish('swisstherm/status', payload=f'Fehler beim Abruf der Swisstherm-Energiezähler: {sys.exc_info()}')
+        client.publish('swisstherm/status', payload=f'Notify: Fehler beim Abruf der Swisstherm-Energiezähler: {sys.exc_info()}')
 
     print('Abruf Swisstherm-Energiezähler wurde beendet.')
-    client.publish('swisstherm/status', payload='Abruf Swisstherm-Energiezähler wurde beendet.')
+    client.publish('swisstherm/status', payload='Notify: Abruf Swisstherm-Energiezähler wurde beendet.')
 
     file = open("energy-data.txt", "w")
     file.write(json.dumps(data))
