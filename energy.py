@@ -11,7 +11,7 @@ import sys
 import json
 
 import functions
-import gsheet
+# import gsheet
 import secrets
 
 
@@ -28,7 +28,7 @@ def energiezaehler(options, client):
 
         functions.login(driver)  # Anmelden mit separater Funktion
 
-        WebDriverWait(driver, 20).until(
+        WebDriverWait(driver, 30).until(
             ec.presence_of_element_located((By.CSS_SELECTOR, 'div.main'))
         )
         startfenster = driver.current_window_handle
@@ -39,10 +39,10 @@ def energiezaehler(options, client):
             #  Energiezähler (Geräte > xcenter x40 > DYNAMIC > Status > Leistung und Effizienz)
             driver.get(secrets.portal_datapath_energy[zaehlerwahl])
 
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 30).until(
                 ec.presence_of_element_located((By.CSS_SELECTOR, 'div.row'))
             )
-            time.sleep(2)
+            time.sleep(5)
 
             values = driver.find_elements(By.CSS_SELECTOR, 'div.row.g-g > div > div')
 
@@ -63,9 +63,10 @@ def energiezaehler(options, client):
         data["Date"] = datetime.datetime.now().strftime("%d.%m.%Y")
         data["Time"] = datetime.datetime.now().strftime("%H:%M:%S")
 
-        for key in data:
-            client.publish('swisstherm/zaehler/'+key, payload=str(data[key]).replace(',', '.'))
-            print(f'{key:16}{data[key]}')
+        # for key in data:
+            # client.publish('swisstherm/zaehler/'+key, payload=str(data[key]).replace(',', '.'))
+            # print(f'{key:16}{data[key]}')
+        client.publish('swisstherm/zaehler/json', payload=json.dumps(data))
         client.publish('swisstherm/status', payload=f'Zähler abgerufen ({len(data)} Werte).')
 
         driver.quit()
@@ -74,11 +75,12 @@ def energiezaehler(options, client):
         print(f'Fehler beim Abruf der Swisstherm-Energiezähler: ', sys.exc_info())
         client.publish('swisstherm/status',
                        payload=f'Notify: Fehler beim Abruf der Swisstherm-Energiezähler: {sys.exc_info()}')
+        driver.quit()
 
     print('Swisstherm-Energiezähler erfolgreich abgerufen.')
     client.publish('swisstherm/status', payload='Notify: Swisstherm-Energiezähler erfolgreich abgerufen.')
 
-    gsheet.main(data, client)
+    # gsheet.main(data, client)
 
 
 def write_data(data):
