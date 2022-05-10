@@ -97,10 +97,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
     options.add_argument('--no-sandbox')
 
     if abrufversuche > 0:
-        if abrufversuche < 4:
-            wartezeit = 3
-        else:
-            wartezeit = int(control['waittime'])
+        wartezeit = int(control['waittime'])
         time.sleep(wartezeit * 60)
         client.publish('swisstherm/status',
                        payload=f'Abrufversuch {abrufversuche}: Warte {wartezeit} min ...')
