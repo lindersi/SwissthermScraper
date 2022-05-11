@@ -16,7 +16,7 @@ Prerequisites:
 - Chrome and Chromedriver installed on OS (on Windows, just place chromedriver.exe in the same folder as app.py)
 
 Setup:
-- Place Python files (only app.py and functions.py required)
+- Place Python files (app.py, functions.py and energy.py required)
 - Set web portal domain and user/password 
   (in secrets.py which is for security reasons not part of the repo)
 - Set MQTT host and credentials
