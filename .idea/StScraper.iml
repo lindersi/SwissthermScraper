@@ -4,5 +4,8 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="MathTestScraper" />
+    <orderEntry type="module" module-name="WeissensteinInfo" />
+    <orderEntry type="module" module-name="python-basics" />
   </component>
 </module>

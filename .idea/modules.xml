@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../MathTestScraper/.idea/MathTestScraper.iml" filepath="$PROJECT_DIR$/../MathTestScraper/.idea/MathTestScraper.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/StScraper.iml" filepath="$PROJECT_DIR$/.idea/StScraper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../WeissensteinInfo/.idea/WeissensteinInfo.iml" filepath="$PROJECT_DIR$/../WeissensteinInfo/.idea/WeissensteinInfo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../python-basics/.idea/python-basics.iml" filepath="$PROJECT_DIR$/../python-basics/.idea/python-basics.iml" />
     </modules>
   </component>
 </project>
