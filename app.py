@@ -178,12 +178,18 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
             data[wpzustand[0].replace('Wärmepumpenzustand', 'WP-Zustand')] = wpzustand[1]
 
             values = driver.find_elements(By.CSS_SELECTOR, 'div.overlay span')
-            keys = ["Heizkreis", "Vorlauf Soll", "Vorlauf Ist", "Mischer", "Modus", "Ventil",
-                    "WP Rückl.", "WP Vorl.", "WP Umwälz", "WP UW Öffn", "WP UW Hyst", "WP UW Flow",
-                    "TWE Soll", "TWE Ist", "TWE Hyst", "Puffer Soll", "Puffer Ist", "Puffer Hyst"]
+            if values[2].text.split(' ')[0] == "Aus":  # Modus = "Aus" (dann werden die Vorlauftemp. nicht angezeigt)
+                keys = ["Heizkreis", "Mischer", "Modus", "Ventil",
+                        "WP Rückl.", "WP Vorl.", "WP Umwälz", "WP UW Öffn", "WP UW Hyst", "WP UW Flow",
+                        "TWE Soll", "TWE Ist", "TWE Hyst", "Puffer Soll", "Puffer Ist", "Puffer Hyst"]
+            else:  # Normal-Heizbetrieb
+                keys = ["Heizkreis", "Vorlauf Soll", "Vorlauf Ist", "Mischer", "Modus", "Ventil",
+                        "WP Rückl.", "WP Vorl.", "WP Umwälz", "WP UW Öffn", "WP UW Hyst", "WP UW Flow",
+                        "TWE Soll", "TWE Ist", "TWE Hyst", "Puffer Soll", "Puffer Ist", "Puffer Hyst"]
             i = 0
             for key in keys:
                 data[key] = values[i].text.split(' ')[0]
+                print(f'{key:16}{data[key]}')
                 i += 1
 
             data["Timestamp"] = datetime.datetime.now()
