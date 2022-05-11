@@ -183,7 +183,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
                     "TWE Soll", "TWE Ist", "TWE Hyst", "Puffer Soll", "Puffer Ist", "Puffer Hyst"]
 
             if values[2].text.split(' ')[0] == "Aus":  # (Heizkreis-)Modus = "Aus"
-                del keys[1:3]  # Einträge Vorlauf Soll und Ist entfernen (fehlen in dem Fall in der Heizkreisübersicht)
+                del keys[1:3]  # Einträge "Vorlauf Soll/Ist" entfernen (fehlen in dem Fall in der Heizkreisübersicht)
 
             i = 0
             for key in keys:
