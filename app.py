@@ -186,7 +186,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
 
             if values[2].text.split(' ')[0] == "Aus":  # (Heizkreis-)Modus = "Aus"
                 del keys[1:3]  # Einträge "Vorlauf Soll/Ist" entfernen (fehlen in dem Fall in der Heizkreisübersicht)
-            else if values[4].text.split(' ')[0] != "Heizen":  # Gegen Fehler beim Zurückwechseln in Heizbetrieb
+            elif values[4].text.split(' ')[0] != "Heizen":  # Gegen Fehler beim Zurückwechseln in Heizbetrieb
                 client.publish('swisstherm/status', payload='Datenzuweisung fehlerhaft - Neustart...')
                 raise ConnectionError('Datenzuweisung fehlerhaft - Neustart...')
             i = 0
