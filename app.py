@@ -137,8 +137,10 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
             if control['onoff'] == "restart":
                 client.publish('swisstherm/status', payload='Neustart angefordert...')
                 raise InterruptedError('Neustart angefordert...')
+
             if x > 0:
-                time.sleep(int(control['delay']))
+                y = (4 if data['Modus'] == "Aus" else 1)  # Längeres Abrufintervall, wenn Heizkreis Aus
+                time.sleep(int(control['delay']) * y)
             else:
                 client.publish('swisstherm/status', payload='Abfrage gestartet')
             x += 1
@@ -184,7 +186,9 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
 
             if values[2].text.split(' ')[0] == "Aus":  # (Heizkreis-)Modus = "Aus"
                 del keys[1:3]  # Einträge "Vorlauf Soll/Ist" entfernen (fehlen in dem Fall in der Heizkreisübersicht)
-
+            else if values[4].text.split(' ')[0] != "Heizen":  # Gegen Fehler beim Zurückwechseln in Heizbetrieb
+                client.publish('swisstherm/status', payload='Datenzuweisung fehlerhaft - Neustart...')
+                raise ConnectionError('Datenzuweisung fehlerhaft - Neustart...')
             i = 0
             for key in keys:
                 data[key] = values[i].text.split(' ')[0]
