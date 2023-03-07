@@ -83,7 +83,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
                  "Chrome/96.0.4664.45 Safari/537.36"
 
     options = webdriver.ChromeOptions()
-    options.headless = True
+    options.headless = False
     options.add_argument(f'user-agent={user_agent}')
     options.add_argument("--window-size=1024,768")
     options.add_argument('--ignore-certificate-errors')
@@ -137,6 +137,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
         x = 0
         while control['onoff'] != "stop":  # Endlosschleife mit "while True" oder begrenzt mit "while x in range(n)>"
             if control['onoff'] == "restart":
+                control['onoff'] = ""
                 client.publish('swisstherm/status', payload='Neustart angefordert...')
                 raise InterruptedError('Neustart angefordert...')
 
