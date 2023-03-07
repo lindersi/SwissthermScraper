@@ -23,7 +23,7 @@ import paho.mqtt.client as mqtt
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
-    print("MQQT connected with result code " + str(rc))
+    print("MQTT connected with result code " + str(rc))
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
@@ -103,9 +103,9 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
             wartezeit = 3
         else:
             wartezeit = int(control['waittime'])
-        time.sleep(wartezeit * 60)
         client.publish('swisstherm/status',
                        payload=f'Abrufversuch {abrufversuche}: Warte {wartezeit} min ...')
+        time.sleep(wartezeit * 60)
 
     abrufversuche += 1
 
@@ -138,7 +138,6 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
         while control['onoff'] != "stop":  # Endlosschleife mit "while True" oder begrenzt mit "while x in range(n)>"
             if control['onoff'] == "restart":
                 control['onoff'] = ""
-                client.publish('swisstherm/status', payload='Neustart angefordert...')
                 raise InterruptedError('Neustart angefordert...')
 
             if x > 0:
