@@ -27,7 +27,7 @@ Usage:
 - Listen to MQTT topic "swisstherm/#"
 - Set intervall with "30" to "swisstherm/control/delay" (seconds)
 - Set wait time for web reconnection retries with "5" to "swisstherm/control/waittime" (minutes)
-- Stop scraping with "stop" to "swisstherm/onoff" (no start possible via MQTT)
+- Stop scraping with "stop" to "swisstherm/control/onoff" (stops complete python script)
 - Restart with "restart" to "swisstherm/control/onoff"
 - Get counters with "get" to "swisstherm/control/zaehler" (total energy consumption, heat production, operating minutes)
 - Receive Status on "swisstherm/status"
