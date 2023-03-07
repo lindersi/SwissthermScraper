@@ -97,7 +97,9 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
     options.add_argument('--no-sandbox')
 
     if abrufversuche > 0:
-        if abrufversuche < 4:
+        if abrufversuche == 1:
+            wartezeit = 0.2
+        elif abrufversuche < 4:
             wartezeit = 3
         else:
             wartezeit = int(control['waittime'])
@@ -187,7 +189,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
             if values[2].text.split(' ')[0] == "Aus":  # (Heizkreis-)Modus = "Aus"
                 del keys[1:3]  # Einträge "Vorlauf Soll/Ist" entfernen (fehlen in dem Fall in der Heizkreisübersicht)
             elif values[4].text.split(' ')[0] != "Heizen":  # Gegen Fehler beim Zurückwechseln in Heizbetrieb
-                client.publish('swisstherm/status', payload='Datenzuweisung fehlerhaft - Neustart...')
+                client.publish('swisstherm/status', payload='Notify: Datenzuweisung fehlerhaft - Neustart...')
                 raise ConnectionError('Datenzuweisung fehlerhaft - Neustart...')
             i = 0
             for key in keys:
