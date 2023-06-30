@@ -170,7 +170,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
             if data["Zustand seit"] == refresh_check['value']:
                 refresh_check['count'] += 1
                 if refresh_check['count'] * int(control['delay']) >= 120:
-                    client.publish('swisstherm/status', payload='Daten nicht aktualisiert - Neustart...')
+                    client.publish('swisstherm/status', payload='Notify: Daten nicht aktualisiert - Neustart...')
                     raise ConnectionError('Daten nicht aktualisiert - Neustart...')
             else:
                 refresh_check['count'] = 0
@@ -234,5 +234,5 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
 
 print('Abruf Swisstherm-Heizkreisdaten wurde beendet.')
 client.publish('swisstherm/status', payload=f'Notify: Abruf Swisstherm-Heizkreisdaten von {host} wurde beendet.')
-# Meldungen mit Stichwort "Notify: " werden von Home Assistant weiter geleitet!
+# Meldungen mit Stichwort "Notify: " werden von Home Assistant weiter geleitet (z.B. Pushnachricht mit notify.simon)!
 client.loop_stop()
