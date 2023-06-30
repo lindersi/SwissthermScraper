@@ -8,11 +8,11 @@ def login(driver):
     driver.get(secrets.portal_loginpath)
     print('Anmelden...')
     time.sleep(2)
-    assert "Swisstherm" in driver.title
-    elem = driver.find_element(By.NAME, "UserName")
+    assert "Login" in driver.title
+    elem = driver.find_element(By.ID, "Login")
     elem.clear()
     elem.send_keys(secrets.portal_user)
-    elem = driver.find_element(By.NAME, "Password")
+    elem = driver.find_element(By.ID, "Password")
     elem.clear()
     elem.send_keys(secrets.portal_password)
     elem.send_keys(Keys.RETURN)
