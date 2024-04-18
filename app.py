@@ -7,6 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.common.keys import Keys
 import time
 import datetime
 import sys
@@ -84,7 +85,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
 
     options = webdriver.ChromeOptions()
     options.add_argument('--no-sandbox')
-    options.add_argument('--headless')
+    # options.add_argument('--headless')
     options.add_argument(f'user-agent={user_agent}')
     options.add_argument("--window-size=1024,768")
     options.add_argument('--ignore-certificate-errors')
@@ -116,8 +117,11 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
         print('Laden...')
         client.publish('swisstherm/status', payload=f'Anmeldung erfolgreich. Seite laden...')
 
+        # time.sleep(5)
+        # driver.switch_to.active_element.send_keys(Keys.SPACE)
+
         element = WebDriverWait(driver, 20).until(
-            ec.presence_of_element_located((By.CSS_SELECTOR, 'div.main'))
+            ec.presence_of_element_located((By.CSS_SELECTOR, 'main'))
         )
 
         #  Betriebsdaten Heizkreisübersicht
@@ -147,7 +151,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
                 client.publish('swisstherm/status', payload='Abfrage gestartet')
             x += 1
 
-            values = driver.find_elements(By.CSS_SELECTOR, 'div.row.g-g > div > div')
+            values = driver.find_elements(By.CSS_SELECTOR, 'div.appContainer div.component-container > div > div > div')
 
             refresh_check['value'] = data.get("Zustand seit")
             # Speichern des letzten Werts für die Aktualisierungs-Prüfung.
