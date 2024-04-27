@@ -85,7 +85,7 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
 
     options = webdriver.ChromeOptions()
     options.add_argument('--no-sandbox')
-    # options.add_argument('--headless')
+    options.add_argument('--headless')
     options.add_argument(f'user-agent={user_agent}')
     options.add_argument("--window-size=1024,768")
     options.add_argument('--ignore-certificate-errors')
