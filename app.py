@@ -117,9 +117,6 @@ for abrufversuche in range(int(control['retries'])):  # Anzahl Versuche im Fehle
         print('Laden...')
         client.publish('swisstherm/status', payload=f'Anmeldung erfolgreich. Seite laden...')
 
-        # time.sleep(5)
-        # driver.switch_to.active_element.send_keys(Keys.SPACE)
-
         element = WebDriverWait(driver, 20).until(
             ec.presence_of_element_located((By.CSS_SELECTOR, 'main'))
         )

@@ -28,9 +28,10 @@ def energiezaehler(options, client):
 
         functions.login(driver)  # Anmelden mit separater Funktion
 
-        WebDriverWait(driver, 30).until(
-            ec.presence_of_element_located((By.CSS_SELECTOR, 'div.main'))
+        WebDriverWait(driver, 20).until(
+            ec.presence_of_element_located((By.CSS_SELECTOR, 'main'))
         )
+
         startfenster = driver.current_window_handle
 
         for zaehlerwahl in secrets.portal_datapath_energy:
@@ -40,20 +41,24 @@ def energiezaehler(options, client):
             driver.get(secrets.portal_datapath_energy[zaehlerwahl])
 
             WebDriverWait(driver, 30).until(
-                ec.presence_of_element_located((By.CSS_SELECTOR, 'div.row'))
+                ec.presence_of_element_located((By.CSS_SELECTOR, 'div.row-container'))
             )
-            time.sleep(5)
+            time.sleep(2)
 
-            values = driver.find_elements(By.CSS_SELECTOR, 'div.row.g-g > div > div')
+            values = driver.find_elements(By.CSS_SELECTOR, 'div.row-container > div p')
 
-            if "Wärmemenge" in values[6].text.split(" ")[0]:
-                data[values[6].text] = values[7].text.split(" ")[0]  # Wärmemenge Gesamt / Hz / TWE
-                data[values[10].text] = values[11].text.split(" ")[0]  # Leistungsaufnahme Gesamt / Hz /  TWE
-                data[values[14].text] = values[15].text  # Gemittelter COP Gesamt / Hz / TWE
-                data[values[18].text] = values[19].text.split(" ")[0]  # Betriebsminuten Gesamt / Hz / TWE
-            elif "Betriebsstunden" in values[6].text.split(" ")[0]:
-                data[values[22].text] = values[23].text.split(" ")[0]  # Betriebsstunden ext. WEZ 1
-                data[values[26].text] = values[27].text.split(" ")[0]  # Betriebsstunden ext. WEZ 2
+            if "Wärmemenge" in values[0].text:
+                data[values[0].text] = values[1].text.split(" ")[0]  # Wärmemenge Gesamt / Hz / TWE
+                data[values[2].text] = values[3].text.split(" ")[0]  # Leistungsaufnahme Gesamt / Hz /  TWE
+                data[values[4].text] = values[5].text  # Gemittelter COP Gesamt / Hz / TWE
+                data[values[6].text] = values[7].text.split(" ")[0]  # Betriebsminuten Gesamt / Hz / TWE
+            elif "Betriebsstunden" in values[0].text:
+                data[values[0].text] = values[1].text.split(" ")[0]  # Betriebsstunden Inverter
+                data[values[2].text] = values[3].text.split(" ")[0]  # Betriebsstunden Lüfter
+                data[values[4].text] = values[5].text.split(" ")[0]  # Betriebsstunden Pufferladepumpe
+                data[values[6].text] = values[7].text.split(" ")[0]  # Betriebsstunden Umwälzpumpe
+                data[values[8].text] = values[9].text.split(" ")[0]  # Betriebsstunden ext. WEZ 1
+                data[values[10].text] = values[11].text.split(" ")[0]  # Betriebsstunden ext. WEZ 2
             else:
                 raise ValueError
 
