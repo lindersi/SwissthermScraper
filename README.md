@@ -1,5 +1,5 @@
 # SwissthermScraper
-Scraping swisstherm/kermi/pzp heatpump data from the web portal and send through mqtt. Uses Python3, Selenium with Chromedriver, Paho MQTT.
+Scraping swisstherm/grünenwald/kermi/pzp heatpump data from the web portal and send through mqtt. Uses Python3, Selenium with Chromedriver, Paho MQTT.
 
 Currently my only way to get my own data to use in Homeassistant, because I didn't found any other readable interface.
 
@@ -10,13 +10,17 @@ Created with little coding knowledge. Hints for improvement are highly appreciat
 Where data is scraped from:
 ![grafik](https://user-images.githubusercontent.com/76875781/147733333-31de635b-6b2e-4d15-adb4-5873575ca2ed.png)
 
-Prerequisites:
+Requires:
 - Python3 environment
 - Python modules selenium, paho-mqtt, datetime and sys installed
 - Chrome and Chromedriver installed on OS (on Windows, just place chromedriver.exe in the same folder as app.py)
 
 Setup:
-- Place Python files (app.py, functions.py and energy.py required)
+- git clone
+- python3 -m venv venv
+- source venv/bin/activate
+- pip install -r requirements.txt
+- copy/create secrets.py
 - Set web portal domain and user/password 
   (in secrets.py which is for security reasons not part of the repo)
 - Set MQTT host and credentials
@@ -39,13 +43,22 @@ Info using systemd:
 Recommended unit file:
 ```
 [Unit]
-Description=Swisstherm-Scraper
-Wants=network-online.target
-After=network-online.target
+Description=Heatpump-Scraper Service
+After=network.target
 
 [Service]
-Type=idle
-ExecStart=/usr/bin/python /home/<user>/<path-to>/app.py  > /home/<user>/<path-to>/swisstherm.log
+User=YOUR_USERNAME
+Group=YOUR_USERNAME
+
+WorkingDirectory=/home/YOUR_USERNAME/path/to/heatingscraper/
+
+ExecStart=/home/YOUR_USERNAME/path/to/heatingscraper/venv/bin/python /home/YOUR_USERNAME/path/to/heatingscraper/app.py
+
+Restart=always
+RestartSec=10s
+
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
