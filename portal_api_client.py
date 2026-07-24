@@ -923,7 +923,10 @@ class PortalApiClient:
 
     @staticmethod
     def _format_energy_value(raw: Any, *, keep_full: bool = False) -> str:
-        """Match former Selenium DOM strings (German decimal, no unit)."""
+        """Format counter values for MQTT JSON (dot decimals, no unit).
+
+        Home Assistant ``value_json`` / numeric sensors need ``.`` not ``,``.
+        """
         if raw is None:
             return ""
         if isinstance(raw, bool):
@@ -933,9 +936,8 @@ class PortalApiClient:
         if isinstance(raw, float):
             if raw.is_integer():
                 return str(int(raw))
-            text = f"{raw:.6f}".rstrip("0").rstrip(".")
-            return text.replace(".", ",")
-        text = str(raw).strip()
+            return f"{raw:.6f}".rstrip("0").rstrip(".")
+        text = str(raw).strip().replace(",", ".")
         if keep_full:
             return text
         return text.split(" ")[0]
