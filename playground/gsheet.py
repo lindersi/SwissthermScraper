@@ -14,7 +14,7 @@ from googleapiclient.errors import HttpError
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 # The ID and range of the spreadsheet.
-SPREADSHEET_ID = '1Pny7iRRp4aL3n-oTF155LaL44Wf4mf7ZcZhidHeyqik'
+SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'
 RANGE_NAME = 'Energieverbrauch!A:G'
 
 

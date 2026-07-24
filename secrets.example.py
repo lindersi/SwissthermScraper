@@ -17,3 +17,16 @@ mqtt_user = "mqttuser"
 mqtt_pwd = "mqttpassword"
 mqtt_host = "homeassistant"
 mqtt_port = 1883
+
+# Optional — portal_api_client.py (Heizkreis via cloud JSON API).
+# Defaults are derived from portal_loginpath / Heizkreis URL when omitted.
+# portal_api_base = "https://portal.example.ch/xcenterpro/api"
+# portal_installation_id = "YOUR-UUID"
+# portal_device_id = "DEVICE-UUID"
+# portal_openid_client_id = "XCenterUI"
+# portal_openid_redirect_uri = "https://portal.example.ch/xcenterui/xcenter/auth/loginCallback"
+# portal_openid_scopes = "openid email profile offline_access kermi.xcenter kermi.webcrm"
+# portal_datapoint_map = {
+#     # DatapointConfigId -> MQTT key (same names as scrape.py / swisstherm/<key>)
+#     # "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee": "Aussentemp.",
+# }

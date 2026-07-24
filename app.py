@@ -1,9 +1,8 @@
 """
 Swisstherm / Grünenwald / Kermi heat-pump scraper.
 
-Scrapes the web portal with Selenium and publishes values to MQTT for Home Assistant.
-Browser setup (headless, Chrome binary) lives in browser.py so Windows (dev) and
-Linux (prod) share one path via Selenium Manager.
+Fetches Heizkreis values via the portal JSON API and publishes to MQTT for
+Home Assistant. Energy-counter fetch still uses Selenium (energy.py / browser.py).
 """
 
 from __future__ import annotations
@@ -15,14 +14,10 @@ import time
 import traceback
 
 import paho.mqtt.client as mqtt
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as ec
-from selenium.webdriver.support.ui import WebDriverWait
 
 import browser
 import energy
-import functions
-import scrape
+import portal_api_client
 import secrets
 
 # ------------------------------------------------------
@@ -83,24 +78,13 @@ def backoff_minutes(attempt: int) -> float:
 
 
 def run_scrape_session(client: mqtt.Client, host: str, on_cycle_ok=None) -> None:
-    """One browser session: login, open Heizkreis, scrape until stop/restart/error."""
-    options = browser.create_chrome_options()
-    driver = browser.create_driver(options)
+    """One API session: login, poll Heizkreis until stop/restart/error."""
+    api = portal_api_client.PortalApiClient()
     data: dict = {}
     try:
-        functions.login(driver)
+        api.login()
         print("Laden...")
         publish_status(client, "Anmeldung erfolgreich. Seite laden...")
-
-        WebDriverWait(driver, 20).until(
-            ec.presence_of_element_located((By.CSS_SELECTOR, "main"))
-        )
-
-        driver.get(secrets.portal_datapath["Heizkreis"])
-        WebDriverWait(driver, 10).until(
-            ec.presence_of_element_located((By.CSS_SELECTOR, "div.overlay"))
-        )
-        time.sleep(5)
 
         stale_count = 0
         previous_zustand = ""
@@ -119,7 +103,9 @@ def run_scrape_session(client: mqtt.Client, host: str, on_cycle_ok=None) -> None
                 publish_status(client, "Abfrage gestartet")
             loop += 1
 
-            data = scrape.scrape_heizkreis(driver)
+            data = api.fetch_heizkreis()
+            for key, value in data.items():
+                print(f"{key:16}{value}")
 
             if previous_zustand and data["Zustand seit"] == previous_zustand:
                 stale_count += 1
@@ -136,7 +122,10 @@ def run_scrape_session(client: mqtt.Client, host: str, on_cycle_ok=None) -> None
             data["Time"] = now.strftime("%H:%M:%S")
 
             for key, value in data.items():
-                client.publish(f"swisstherm/{key}", payload=str(value).replace(",", "."))
+                client.publish(
+                    portal_api_client.mqtt_topic_for_key(key),
+                    payload=str(value).replace(",", "."),
+                )
 
             publish_status(
                 client,
@@ -148,7 +137,7 @@ def run_scrape_session(client: mqtt.Client, host: str, on_cycle_ok=None) -> None
                 on_cycle_ok()
 
     finally:
-        browser.quit_driver(driver)
+        pass
 
 
 def main() -> int:
@@ -158,7 +147,7 @@ def main() -> int:
         client,
         f"Swisstherm-Scraper gestartet auf {host}, "
         f"Abrufintervall (delay): {control['delay']}s, "
-        f"headless={browser.should_run_headless()}",
+        f"source=portal-api",
     )
 
     attempt = 0

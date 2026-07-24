@@ -1,0 +1,29 @@
+# Template systemd unit for SwissthermScraper.
+# 1) Edit User/Group/paths below
+# 2) Install:
+#      sudo cp swisstherm-scraper.service /etc/systemd/system/
+#      sudo systemctl daemon-reload
+#      sudo systemctl enable --now swisstherm-scraper.service
+# 3) Logs: journalctl -u swisstherm-scraper.service -f
+
+[Unit]
+Description=Swisstherm heat-pump scraper (Selenium → MQTT)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+Group=YOUR_USERNAME
+WorkingDirectory=/home/YOUR_USERNAME/path/to/SwissthermScraper
+Environment=STSCRAPER_HEADLESS=1
+# Optional if Chromium/Chrome is not on PATH:
+# Environment=STSCRAPER_CHROME_BINARY=/usr/bin/chromium-browser
+ExecStart=/home/YOUR_USERNAME/path/to/SwissthermScraper/venv/bin/python /home/YOUR_USERNAME/path/to/SwissthermScraper/app.py
+Restart=always
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

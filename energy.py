@@ -16,7 +16,7 @@ import browser
 import functions
 import secrets
 
-# import gsheet  # optional; enable if Google Sheets export is needed again
+# Optional Sheets export lives in playground/gsheet.py (dormant).
 
 
 def energiezaehler(options, client):
@@ -72,7 +72,7 @@ def energiezaehler(options, client):
         client.publish("swisstherm/status", payload=f"Zähler abgerufen ({len(data)} Werte).")
         print("Swisstherm-Energiezähler erfolgreich abgerufen.")
         client.publish("swisstherm/status", payload="Notify: Swisstherm-Energiezähler erfolgreich abgerufen.")
-        # gsheet.main(data, client)
+        # from playground import gsheet; gsheet.main(data, client)
 
     except Exception as exc:
         print(f"Fehler beim Abruf der Swisstherm-Energiezähler: {exc}")
