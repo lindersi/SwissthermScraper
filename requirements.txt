@@ -1,2 +1,2 @@
-selenium
-paho-mqtt
+selenium>=4.46,<5
+paho-mqtt>=2.1,<3

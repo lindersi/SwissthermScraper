@@ -1,66 +1,66 @@
-# Derivat von app.py zum sporadischen Abruf der Energiedaten und
-# senden an Google Spreadsheet (statt von Hand abschreiben)
+# Sporadic energy-counter scrape; publishes JSON to MQTT (and optionally Google Sheets).
 
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as ec
-import time
+from __future__ import annotations
+
 import datetime
-import sys
 import json
+import sys
+import time
+import traceback
 
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.support.ui import WebDriverWait
+
+import browser
 import functions
-# import gsheet
 import secrets
+
+# import gsheet  # optional; enable if Google Sheets export is needed again
 
 
 def energiezaehler(options, client):
-
-    client.publish('swisstherm/status', payload='Abruf Swisstherm-Zählerstände läuft...')
-    print('Abruf Swisstherm-Zählerstände läuft...')
+    client.publish("swisstherm/status", payload="Abruf Swisstherm-Zählerstände läuft...")
+    print("Abruf Swisstherm-Zählerstände läuft...")
 
     data = {}
+    driver = None
 
     try:
-
-        driver = webdriver.Chrome(options=options)
-
-        functions.login(driver)  # Anmelden mit separater Funktion
+        driver = browser.create_driver(options)
+        functions.login(driver)
 
         WebDriverWait(driver, 20).until(
-            ec.presence_of_element_located((By.CSS_SELECTOR, 'main'))
+            ec.presence_of_element_located((By.CSS_SELECTOR, "main"))
         )
 
         startfenster = driver.current_window_handle
 
         for zaehlerwahl in secrets.portal_datapath_energy:
-
             driver.switch_to.new_window(zaehlerwahl)
-            #  Energiezähler (Geräte > xcenter x40 > DYNAMIC > Status > Leistung und Effizienz)
             driver.get(secrets.portal_datapath_energy[zaehlerwahl])
 
             WebDriverWait(driver, 30).until(
-                ec.presence_of_element_located((By.CSS_SELECTOR, 'div.row-container'))
+                ec.presence_of_element_located((By.CSS_SELECTOR, "div.row-container"))
             )
             time.sleep(2)
 
-            values = driver.find_elements(By.CSS_SELECTOR, 'div.row-container > div p')
+            values = driver.find_elements(By.CSS_SELECTOR, "div.row-container > div p")
 
             if "Wärmemenge" in values[0].text:
-                data[values[0].text] = values[1].text.split(" ")[0]  # Wärmemenge Gesamt / Hz / TWE
-                data[values[2].text] = values[3].text.split(" ")[0]  # Leistungsaufnahme Gesamt / Hz /  TWE
-                data[values[4].text] = values[5].text  # Gemittelter COP Gesamt / Hz / TWE
-                data[values[6].text] = values[7].text.split(" ")[0]  # Betriebsminuten Gesamt / Hz / TWE
+                data[values[0].text] = values[1].text.split(" ")[0]
+                data[values[2].text] = values[3].text.split(" ")[0]
+                data[values[4].text] = values[5].text
+                data[values[6].text] = values[7].text.split(" ")[0]
             elif "Betriebsstunden" in values[0].text:
-                data[values[0].text] = values[1].text.split(" ")[0]  # Betriebsstunden Inverter
-                data[values[2].text] = values[3].text.split(" ")[0]  # Betriebsstunden Lüfter
-                data[values[4].text] = values[5].text.split(" ")[0]  # Betriebsstunden Pufferladepumpe
-                data[values[6].text] = values[7].text.split(" ")[0]  # Betriebsstunden Umwälzpumpe
-                data[values[8].text] = values[9].text.split(" ")[0]  # Betriebsstunden ext. WEZ 1
-                data[values[10].text] = values[11].text.split(" ")[0]  # Betriebsstunden ext. WEZ 2
+                data[values[0].text] = values[1].text.split(" ")[0]
+                data[values[2].text] = values[3].text.split(" ")[0]
+                data[values[4].text] = values[5].text.split(" ")[0]
+                data[values[6].text] = values[7].text.split(" ")[0]
+                data[values[8].text] = values[9].text.split(" ")[0]
+                data[values[10].text] = values[11].text.split(" ")[0]
             else:
-                raise ValueError
+                raise ValueError(f"Unerwartetes Zähler-Layout: {values[0].text!r}")
 
             driver.close()
             driver.switch_to.window(startfenster)
@@ -68,27 +68,23 @@ def energiezaehler(options, client):
         data["Date"] = datetime.datetime.now().strftime("%d.%m.%Y")
         data["Time"] = datetime.datetime.now().strftime("%H:%M:%S")
 
-        # for key in data:
-            # client.publish('swisstherm/zaehler/'+key, payload=str(data[key]).replace(',', '.'))
-            # print(f'{key:16}{data[key]}')
-        client.publish('swisstherm/zaehler/json', payload=json.dumps(data))
-        client.publish('swisstherm/status', payload=f'Zähler abgerufen ({len(data)} Werte).')
+        client.publish("swisstherm/zaehler/json", payload=json.dumps(data))
+        client.publish("swisstherm/status", payload=f"Zähler abgerufen ({len(data)} Werte).")
+        print("Swisstherm-Energiezähler erfolgreich abgerufen.")
+        client.publish("swisstherm/status", payload="Notify: Swisstherm-Energiezähler erfolgreich abgerufen.")
+        # gsheet.main(data, client)
 
-        driver.quit()
-
-    except:
-        print(f'Fehler beim Abruf der Swisstherm-Energiezähler: ', sys.exc_info())
-        client.publish('swisstherm/status',
-                       payload=f'Notify: Fehler beim Abruf der Swisstherm-Energiezähler: {sys.exc_info()}')
-        driver.quit()
-
-    print('Swisstherm-Energiezähler erfolgreich abgerufen.')
-    client.publish('swisstherm/status', payload='Notify: Swisstherm-Energiezähler erfolgreich abgerufen.')
-
-    # gsheet.main(data, client)
+    except Exception as exc:
+        print(f"Fehler beim Abruf der Swisstherm-Energiezähler: {exc}")
+        print(traceback.format_exc(limit=3))
+        client.publish(
+            "swisstherm/status",
+            payload=f"Notify: Fehler beim Abruf der Swisstherm-Energiezähler: {exc}",
+        )
+    finally:
+        browser.quit_driver(driver)
 
 
 def write_data(data):
-    file = open("energy-data.txt", "w")
-    file.write(json.dumps(data))
-    file.close()
+    with open("energy-data.txt", "w", encoding="utf-8") as file:
+        file.write(json.dumps(data))

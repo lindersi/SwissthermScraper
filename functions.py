@@ -34,6 +34,5 @@ def writefile(data):
         for key in data:
             f.write(str(data[key]) + '\t')
         f.write('\n')
-        f.close()
     print(f'Data written to {filename}\n')
 

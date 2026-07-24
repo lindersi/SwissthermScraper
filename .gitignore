@@ -2,12 +2,23 @@
 ##########
 secrets.py
 unit-files
-__pycache__
+__pycache__/
+*.py[cod]
 test*
 credentials.json
 token.json
 energy-data.txt
-.idea
+heizkreis_history.csv
+.idea/
+.vscode/
+*.code-workspace
+Input/
+/Input/
+.venv/
+venv/
+chromedriver
+chromedriver.exe
+chromedriver.exe.legacy
 
 # Compiled source #
 ###################
