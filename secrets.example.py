@@ -18,8 +18,9 @@ mqtt_pwd = "mqttpassword"
 mqtt_host = "homeassistant"
 mqtt_port = 1883
 
-# Optional — portal_api_client.py (Heizkreis via cloud JSON API).
+# Optional — portal_api_client.py overrides (Heizkreis + energy via JSON API).
 # Defaults are derived from portal_loginpath / Heizkreis URL when omitted.
+# Energy counters use the menu-entry UUID at the end of each portal_datapath_energy URL.
 # portal_api_base = "https://portal.example.ch/xcenterpro/api"
 # portal_installation_id = "YOUR-UUID"
 # portal_device_id = "DEVICE-UUID"

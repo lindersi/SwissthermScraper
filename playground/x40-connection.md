@@ -44,7 +44,7 @@ If HTTP is missing and cannot be added, local HTTP is likely unsupported on this
 
 Production client: repo-root [`portal_api_client.py`](../portal_api_client.py)
 (wired from `app.py`). Maps datapoints to the **same** MQTT keys
-(`swisstherm/Aussentemp.`, `swisstherm/COP`, …; flat `swisstherm_s0_leistung`).
+(`swisstherm/Aussentemp.`, `swisstherm/COP`, `swisstherm/S0-Leistung`, …).
 
 ```bash
 pip install -r requirements.txt

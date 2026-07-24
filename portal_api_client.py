@@ -1,24 +1,23 @@
 """
-Cloud portal JSON API client (no Selenium for Heizkreis).
+Cloud portal JSON API client (no Selenium).
 
 Uses the same xcenterpro JSON endpoints as the RemoteControl UI, and maps
 datapoints to MQTT keys compatible with app.py:
 
-  swisstherm/<sensor>          — Heizkreis values
-  swisstherm_s0_leistung       — flat topic for S0 power (Überschuss S0)
+  swisstherm/<sensor>          — Heizkreis values (incl. swisstherm/S0-Leistung)
   swisstherm/status            — status strings (app.py)
-  swisstherm/zaehler/json      — energy counters (still Selenium via energy.py)
+  swisstherm/zaehler/json      — energy counters (Menu/GetChildEntries)
   swisstherm/control/#         — unchanged (app.py)
 
 KPI notes
 ---------
 - COP (swisstherm/COP): only Aktueller COP (HP_TotalCOP); 0 when idle / null.
 - SCOP / COP Hz / COP TWE: separate average KPIs — never mixed into COP.
-- swisstherm_s0_leistung: S0 power (kW) from portal "S0 Leistung" / ``S0kWh``.
+- S0-Leistung: S0 power (kW) from portal "S0 Leistung" / ``S0kWh``.
 
 CLI
 ---
-  python portal_api_client.py discover|once|devices
+  python portal_api_client.py discover|once|devices|energy
   python portal_api_client.py once --mqtt
 """
 
@@ -54,7 +53,7 @@ MQTT_HEIZKREIS_KEYS = [
     "COP Hz",
     "COP TWE",
     "Verdichteraufnahme",
-    "swisstherm_s0_leistung",
+    "S0-Leistung",
     "Zustand seit",
     "Aussentemp.",
     "WP-Zustand",
@@ -80,7 +79,7 @@ MQTT_HEIZKREIS_KEYS = [
 
 # Human-readable labels (MQTT topic / key stays the left side).
 MQTT_HUMAN_NAMES: dict[str, str] = {
-    "swisstherm_s0_leistung": "Überschuss S0",
+    "S0-Leistung": "Überschuss S0",
     "COP": "Aktueller COP",
     "SCOP": "Gemittelter COP Hz/TWE",
     "COP Hz": "Gemittelter COP Hz",
@@ -104,7 +103,7 @@ WELLKNOWN_TO_MQTT: dict[str, str] = {
     "HP_HeatingWaterAverageCOP": "COP Hz",
     "HP_HotWaterAverageCOP": "COP TWE",
     "HP_AktuelleMotorleistungKW": "Verdichteraufnahme",
-    "S0kWh": "swisstherm_s0_leistung",
+    "S0kWh": "S0-Leistung",
     "HeatpumpStateLastChanged": "Zustand seit",
     "LuftTemperatur": "Aussentemp.",
     "HP_HeatpumpState": "WP-Zustand",
@@ -144,7 +143,7 @@ NAME_TO_MQTT: dict[str, str] = {
     "Gemittelter COP Hz": "COP Hz",
     "Gemittelter COP TWE": "COP TWE",
     "Aktuelle Verdichteraufnahme": "Verdichteraufnahme",
-    "S0 Leistung": "swisstherm_s0_leistung",
+    "S0 Leistung": "S0-Leistung",
     "Status Gesamtanlage": "WP-Zustand",
     "Isttemperatur Vorlauf MK1": "Vorlauf Ist",
     "Solltemperatur Vorlauf MK1": "Vorlauf Soll",
@@ -594,6 +593,25 @@ class PortalApiClient:
         )
         return (data or {}).get("ResponseData") or []
 
+    def get_child_entries(
+        self,
+        parent_menu_entry_id: str,
+        *,
+        device_id: str | None = None,
+        with_details: bool = True,
+    ) -> dict[str, Any]:
+        """Menu page contents (bundles) for a counter / submenu entry."""
+        iid = self.cfg["installation_id"]
+        data = self.post(
+            f"Menu/GetChildEntries/{iid}",
+            {
+                "ParentMenuEntryId": parent_menu_entry_id,
+                "DeviceId": device_id or self.cfg["device_id"],
+                "WithDetails": with_details,
+            },
+        )
+        return (data or {}).get("ResponseData") or {}
+
     def read_values(self, datapoints: list[dict]) -> list[dict]:
         """datapoints: {config_id, device_id, type?}"""
         iid = self.cfg["installation_id"]
@@ -888,10 +906,93 @@ class PortalApiClient:
 
         return data
 
+    @staticmethod
+    def energy_menu_ids_from_secrets() -> dict[str, str]:
+        """Map portal_datapath_energy page name → menu-entry UUID (URL tail)."""
+        paths = getattr(secrets, "portal_datapath_energy", None) or {}
+        out: dict[str, str] = {}
+        for name, url in paths.items():
+            m = re.search(
+                r"/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+                r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$",
+                urlparse(url).path,
+            )
+            if m:
+                out[name] = m.group(1)
+        return out
+
+    @staticmethod
+    def _format_energy_value(raw: Any, *, keep_full: bool = False) -> str:
+        """Match former Selenium DOM strings (German decimal, no unit)."""
+        if raw is None:
+            return ""
+        if isinstance(raw, bool):
+            return str(raw)
+        if isinstance(raw, int):
+            return str(raw)
+        if isinstance(raw, float):
+            if raw.is_integer():
+                return str(int(raw))
+            text = f"{raw:.6f}".rstrip("0").rstrip(".")
+            return text.replace(".", ",")
+        text = str(raw).strip()
+        if keep_full:
+            return text
+        return text.split(" ")[0]
+
+    def fetch_energy_counters(self) -> dict[str, Any]:
+        """Same key set / shape as legacy energy.energiezaehler Selenium scrape."""
+        menu_ids = self.energy_menu_ids_from_secrets()
+        if not menu_ids:
+            raise ValueError("secrets.portal_datapath_energy missing or has no UUIDs")
+
+        data: dict[str, Any] = {}
+        for _page, menu_id in menu_ids.items():
+            page = self.get_child_entries(menu_id)
+            bundles = page.get("Bundles") or []
+            if not bundles:
+                raise ConnectionError(
+                    f"Keine Zähler-Bundles für MenuEntry {menu_id}"
+                )
+            labels_values: list[tuple[str, Any]] = []
+            for bundle in bundles:
+                label = bundle.get("DisplayName") or ""
+                dps = bundle.get("Datapoints") or []
+                if not dps:
+                    continue
+                val = (dps[0].get("DatapointValue") or {}).get("Value")
+                if not label:
+                    cfg = dps[0].get("Config") or {}
+                    label = cfg.get("DisplayName") or ""
+                if label:
+                    labels_values.append((label, val))
+
+            if not labels_values:
+                raise ConnectionError(
+                    f"Keine Zählerwerte für MenuEntry {menu_id}"
+                )
+
+            first_label = labels_values[0][0]
+            if "Wärmemenge" in first_label:
+                # Legacy: COP field kept full text; others first token only.
+                for i, (label, val) in enumerate(labels_values):
+                    keep_full = i == 2
+                    data[label] = self._format_energy_value(val, keep_full=keep_full)
+            elif "Betriebsstunden" in first_label:
+                for label, val in labels_values:
+                    data[label] = self._format_energy_value(val)
+            else:
+                raise ValueError(f"Unerwartetes Zähler-Layout: {first_label!r}")
+
+        now = datetime.datetime.now()
+        data["Date"] = now.strftime("%d.%m.%Y")
+        data["Time"] = now.strftime("%H:%M:%S")
+        return data
+
 
 def mqtt_topic_for_key(key: str) -> str:
-    """Keys starting with ``swisstherm_`` are flat topics; others ``swisstherm/<key>``."""
-    return key if str(key).startswith("swisstherm_") else f"swisstherm/{key}"
+    """Heizkreis MQTT topic: ``swisstherm/<key>``."""
+    return f"swisstherm/{key}"
 
 
 def publish_heizkreis_mqtt(mqtt_client, data: dict[str, Any]) -> None:
@@ -926,8 +1027,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     parser.add_argument(
         "command",
-        choices=("discover", "once", "devices"),
-        help="discover=dump bundles mapping; once=Heizkreis dict; devices=list devices",
+        choices=("discover", "once", "devices", "energy"),
+        help="discover|once|devices|energy (zaehler JSON shape)",
     )
     parser.add_argument(
         "--mqtt",
@@ -963,6 +1064,11 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(rows, indent=2, ensure_ascii=False, default=str))
         else:
             _print_discover(rows)
+        return 0
+
+    if args.command == "energy":
+        data = client.fetch_energy_counters()
+        print(json.dumps(data, indent=2, ensure_ascii=False, default=str))
         return 0
 
     # once

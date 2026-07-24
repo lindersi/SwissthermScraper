@@ -2,7 +2,7 @@
 
 Fetches PZP/Kermi/Grünenwald heat-pump data from the cloud portal and publishes it to MQTT for Home Assistant.
 
-**Major change:** Heizkreis values are no longer scraped with Selenium. They come from the same **xcenterpro JSON API** the RemoteControl UI uses (OpenID login + `Menu/GetBundlesByCategory` / `Datapoint/ReadValues`). MQTT topic names stay compatible with existing Home Assistant entities.
+Heizkreis **and** energy counters use the **xcenterpro JSON API** (OpenID login + menu/datapoint endpoints). No Selenium/Chrome is required. MQTT topic names stay compatible with existing Home Assistant entities.
 
 There is still no useful **local** LAN API on a plain x-center x40 (FTP/Telnet only; no HTTP/Modbus without Interface Module).
 
@@ -15,17 +15,17 @@ Overview page the values correspond to:
 | Path | How | When |
 |---|---|---|
 | Heizkreis / live sensors | `portal_api_client.py` → JSON API | Continuous loop in `app.py` (default every 30 s) |
-| Energy counters | `energy.py` → Selenium DOM | On demand: MQTT `swisstherm/control/zaehler` = `get` |
+| Energy counters | `energy.py` → same API (`Menu/GetChildEntries`) | On demand: MQTT `swisstherm/control/zaehler` = `get` |
 
-Energy counters stay on Selenium for now: they use separate portal counter pages (`portal_datapath_energy`) and a different DOM layout that was **not** mapped onto the JSON API yet. Only Chrome/Chromium is required for that sporadic path.
+Counter page UUIDs come from `secrets.portal_datapath_energy` (same URLs as before; only the trailing menu-entry UUID is used).
 
 ## MQTT
 
 **Heizkreis** (published each loop):
 
 - `swisstherm/<sensor>` — e.g. `Heizleistung`, `COP`, `Aussentemp.`, `WP-Zustand`, overlay keys (`Vorlauf Ist`, `Mischer`, …)
-- `swisstherm_s0_leistung` — flat topic for S0 power (human label: Überschuss S0)
-- Extra KPI topics (same naming style): `swisstherm/SCOP`, `swisstherm/COP Hz`, `swisstherm/COP TWE`, `swisstherm/Verdichteraufnahme`
+- `swisstherm/S0-Leistung` — S0 power (human label: Überschuss S0)
+- Extra KPI topics: `swisstherm/SCOP`, `swisstherm/COP Hz`, `swisstherm/COP TWE`, `swisstherm/Verdichteraufnahme`
 
 **Control / status** (unchanged):
 
@@ -33,7 +33,7 @@ Energy counters stay on Selenium for now: they use separate portal counter pages
 - `swisstherm/control/waittime` — minutes between reconnect attempts
 - `swisstherm/control/retries` — max reconnect attempts
 - `swisstherm/control/onoff` — `stop` / `restart`
-- `swisstherm/control/zaehler` — `get` triggers energy-counter scrape
+- `swisstherm/control/zaehler` — `get` triggers energy-counter fetch
 - `swisstherm/status` — status text (`Notify: …` forwarded by Home Assistant)
 - `swisstherm/zaehler/json` — energy-counter JSON payload
 
@@ -41,10 +41,7 @@ Energy counters stay on Selenium for now: they use separate portal counter pages
 
 - Python 3.10+ recommended
 - MQTT broker reachable from the host
-- Google Chrome or Chromium — **only** if you use energy-counter fetch (`control/zaehler`)
-
-No manual chromedriver install: Selenium Manager downloads a matching driver.
-Do **not** keep a `chromedriver.exe` in the project folder (or on PATH).
+- Network access to the branded portal (OpenID + `…/xcenterpro/api`)
 
 ## Setup
 
@@ -55,17 +52,11 @@ python3 -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 cp secrets.example.py secrets.py
-# edit secrets.py: portal URL/user/password, MQTT host/credentials
+# edit secrets.py: portal URL/user/password, MQTT host/credentials,
+# and portal_datapath_energy URLs (or at least their menu-entry UUIDs)
 ```
 
 `portal_api_client.py` derives API base, installation id and device id from `portal_loginpath` / `portal_datapath["Heizkreis"]` unless you override the optional fields in `secrets.py`.
-
-Optional environment variables (energy-counter / Selenium only):
-
-| Variable | Meaning |
-|---|---|
-| `STSCRAPER_HEADLESS` | `1`/`true` = headless, `0`/`false` = show browser. Default: headless on Linux, headed on Windows. |
-| `STSCRAPER_CHROME_BINARY` | Path to Chrome/Chromium if not on PATH. |
 
 ## Usage
 
@@ -73,11 +64,12 @@ Optional environment variables (energy-counter / Selenium only):
 python app.py
 ```
 
-Dry-run Heizkreis (no MQTT loop):
+Dry-runs (no MQTT loop):
 
 ```bash
-python portal_api_client.py once
-python portal_api_client.py discover   # dump portal datapoint → MQTT mapping
+python portal_api_client.py once      # Heizkreis dict
+python portal_api_client.py energy    # zaehler JSON shape
+python portal_api_client.py discover  # datapoint → MQTT mapping
 ```
 
 - Listen to `swisstherm/#`
@@ -108,10 +100,9 @@ Do **not** commit a customized unit with real usernames/paths; local copies can 
 ## Layout
 
 - `app.py` — MQTT control loop and Heizkreis poll orchestration
-- `portal_api_client.py` — OpenID PKCE + xcenterpro JSON → Heizkreis MQTT keys
-- `energy.py` — energy-counter Selenium scrape → `swisstherm/zaehler/json`
-- `browser.py` / `functions.py` — Chrome + portal login helpers (energy path)
-- `scrape.py` — legacy Heizkreis DOM parser (unused by `app.py`)
+- `portal_api_client.py` — OpenID PKCE + xcenterpro JSON (Heizkreis + energy)
+- `energy.py` — on-demand energy counters → `swisstherm/zaehler/json`
+- `scrape.py` / `browser.py` / `functions.py` — legacy Selenium helpers (unused by `app.py`)
 - `swisstherm-scraper.service` — systemd unit template
 - `secrets.py` — local credentials (not in git)
 - `playground/` — notes, optional Sheets export, saved HTML for debugging

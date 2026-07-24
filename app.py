@@ -1,8 +1,8 @@
 """
 Swisstherm / Grünenwald / Kermi heat-pump scraper.
 
-Fetches Heizkreis values via the portal JSON API and publishes to MQTT for
-Home Assistant. Energy-counter fetch still uses Selenium (energy.py / browser.py).
+Fetches Heizkreis and energy-counter values via the portal JSON API and
+publishes to MQTT for Home Assistant (no Selenium).
 """
 
 from __future__ import annotations
@@ -15,7 +15,6 @@ import traceback
 
 import paho.mqtt.client as mqtt
 
-import browser
 import energy
 import portal_api_client
 import secrets
@@ -42,8 +41,7 @@ def on_message(client, userdata, msg):
 
     if msg.topic == "swisstherm/control/zaehler" and received == "get":
         client.publish("swisstherm/status", payload="Abruf Energiezähler ausgelöst")
-        options = browser.create_chrome_options()
-        energy.energiezaehler(options, client)
+        energy.energiezaehler(None, client)
     elif msg.topic == "swisstherm/control/onoff":
         control["onoff"] = received
     elif msg.topic == "swisstherm/control/delay":
