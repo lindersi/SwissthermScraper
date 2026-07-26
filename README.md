@@ -39,6 +39,8 @@ Counter page UUIDs come from `secrets.portal_datapath_energy` (same URLs as befo
 
 ## Home Assistant (MQTT examples)
 
+Full ready-to-paste MQTT sensor list: [`homeassistant.yaml`](homeassistant.yaml).
+
 Minimal `mqtt:` snippets. With a shared `device:`, keep entity `name` / `object_id` **without** a `Swisstherm` prefix — otherwise entity IDs become `sensor.swisstherm_swisstherm_…`. Use `float(default=none)` so bad payloads become `unknown` instead of a fake `0`. Live topics use `expire_after`; Zähler JSON has no expiry (on-demand).
 
 ```yaml
@@ -135,5 +137,6 @@ Do **not** commit a customized unit with real usernames/paths; local copies can 
 - `energy.py` — on-demand energy counters → `swisstherm/zaehler/json`
 - `scrape.py` / `browser.py` / `functions.py` — legacy Selenium helpers (unused by `app.py`)
 - `swisstherm-scraper.service` — systemd unit template
+- `homeassistant.yaml` — MQTT sensor definitions for Home Assistant
 - `secrets.py` — local credentials (not in git)
 - `playground/` — notes, optional Sheets export, saved HTML for debugging

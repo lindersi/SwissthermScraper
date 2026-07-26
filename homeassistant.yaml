@@ -1,0 +1,228 @@
+mqtt:
+  sensor:
+  # --- Energiezähler (on demand: swisstherm/control/zaehler = get) ---
+  - name: Swisstherm Gesamtbetriebsstunden
+    unique_id: swisstherm_gesamtbetriebsstunden
+    state_topic: swisstherm/zaehler/json
+    value_template: "{{ value_json['Gesamt-Betriebsstunden Hz/TWE'] | float(default=none) }}"
+    unit_of_measurement: h
+    state_class: total_increasing
+    device:
+      identifiers: [swisstherm]
+      name: Swisstherm
+      manufacturer: PZP / Kermi
+      model: x-center
+  - name: Swisstherm Gesamtaufnahme Hz
+    unique_id: swisstherm_gesamtaufnahme_hz
+    state_topic: swisstherm/zaehler/json
+    value_template: "{{ value_json['Leistungsaufnahme Hz'] | float(default=none) }}"
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: total_increasing
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Gesamtaufnahme TWE
+    unique_id: swisstherm_gesamtaufnahme_twe
+    state_topic: swisstherm/zaehler/json
+    value_template: "{{ value_json['Leistungsaufnahme TWE'] | float(default=none) }}"
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: total_increasing
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Gesamtbetriebsstunden WEZ 1
+    unique_id: swisstherm_betriebsstunden_wez1
+    state_topic: swisstherm/zaehler/json
+    value_template: "{{ value_json['Betriebsstunden externer WEZ 1'] | float(default=none) }}"
+    unit_of_measurement: h
+    state_class: total_increasing
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Gesamtbetriebsstunden WEZ 2
+    unique_id: swisstherm_betriebsstunden_wez2
+    state_topic: swisstherm/zaehler/json
+    value_template: "{{ value_json['Betriebsstunden externer WEZ 2'] | float(default=none) }}"
+    unit_of_measurement: h
+    state_class: total_increasing
+    device:
+      identifiers: [swisstherm]
+  # --- Heizkreis (poll ~30 s) ---
+  - name: Swisstherm Status
+    unique_id: swisstherm_status
+    state_topic: swisstherm/status
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Vorlauf Soll
+    unique_id: swisstherm_vorlauf_soll
+    state_topic: swisstherm/Vorlauf Soll
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Vorlauf Ist
+    unique_id: swisstherm_vorlauf_ist
+    state_topic: swisstherm/Vorlauf Ist
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Wärmeleistung
+    unique_id: swisstherm_waermeleistung
+    state_topic: swisstherm/Heizleistung
+    unit_of_measurement: kW
+    device_class: power
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Verdichteraufnahme
+    unique_id: swisstherm_verdichteraufnahme
+    state_topic: swisstherm/Verdichteraufnahme
+    unit_of_measurement: kW
+    device_class: power
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm S0-Leistung
+    unique_id: swisstherm_s0_leistung
+    state_topic: swisstherm/S0-Leistung
+    unit_of_measurement: kW
+    device_class: power
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm COP
+    unique_id: swisstherm_cop
+    state_topic: swisstherm/COP
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm SCOP
+    unique_id: swisstherm_scop
+    state_topic: swisstherm/SCOP
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm COP Hz
+    unique_id: swisstherm_cop_hz
+    state_topic: swisstherm/COP Hz
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm COP TWE
+    unique_id: swisstherm_cop_twe
+    state_topic: swisstherm/COP TWE
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Aussentemp.
+    unique_id: swisstherm_aussentemp
+    state_topic: swisstherm/Aussentemp.
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Zustand
+    unique_id: swisstherm_zustand
+    state_topic: swisstherm/WP-Zustand
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Zustand seit
+    unique_id: swisstherm_zustand_seit
+    state_topic: swisstherm/Zustand seit
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Ventil
+    unique_id: swisstherm_ventil
+    state_topic: swisstherm/Ventil
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Modus
+    unique_id: swisstherm_modus
+    state_topic: swisstherm/Modus
+    expire_after: 7200
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Umwälzpumpe
+    unique_id: swisstherm_umwaelzpumpe
+    state_topic: swisstherm/WP Umwälz
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm WP UWP Flow
+    unique_id: swisstherm_wp_uwp_flow
+    state_topic: swisstherm/WP UW Flow
+    unit_of_measurement: L/min
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Mischer
+    unique_id: swisstherm_mischer
+    state_topic: swisstherm/Mischer
+    unit_of_measurement: "%"
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm TWE Soll
+    unique_id: swisstherm_twe_soll
+    state_topic: swisstherm/TWE Soll
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm TWE Ist
+    unique_id: swisstherm_twe_ist
+    state_topic: swisstherm/TWE Ist
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Puffer Soll
+    unique_id: swisstherm_puffer_soll
+    state_topic: swisstherm/Puffer Soll
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  - name: Swisstherm Puffer Ist
+    unique_id: swisstherm_puffer_ist
+    state_topic: swisstherm/Puffer Ist
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 600
+    device:
+      identifiers: [swisstherm]
+  binary_sensor:
+  - name: Swisstherm online
+    unique_id: swisstherm_online
+    state_topic: swisstherm/Timestamp
+    value_template: "{{ true }}"
+    expire_after: 600
+    device_class: connectivity
+    device:
+      identifiers: [swisstherm]
