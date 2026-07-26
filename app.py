@@ -81,11 +81,9 @@ def run_scrape_session(client: mqtt.Client, host: str, on_cycle_ok=None) -> None
     data: dict = {}
     try:
         api.login()
-        print("Laden...")
+        print("Laden...", flush=True)
         publish_status(client, "Anmeldung erfolgreich. Seite laden...")
 
-        stale_count = 0
-        previous_zustand = ""
         loop = 0
 
         while control["onoff"] != "stop":
@@ -103,16 +101,12 @@ def run_scrape_session(client: mqtt.Client, host: str, on_cycle_ok=None) -> None
 
             data = api.fetch_heizkreis()
             for key, value in data.items():
-                print(f"{key:16}{value}")
+                print(f"{key:16}{value}", flush=True)
 
-            if previous_zustand and data["Zustand seit"] == previous_zustand:
-                stale_count += 1
-                if stale_count * int(control["delay"]) >= 120:
-                    publish_status(client, "Notify: Daten nicht aktualisiert - Neustart...")
-                    raise ConnectionError("Daten nicht aktualisiert - Neustart...")
-            else:
-                stale_count = 0
-            previous_zustand = data["Zustand seit"]
+            # Note: do NOT treat a static "Zustand seit" as stale.
+            # HeatpumpStateLastChanged only updates when WP state changes;
+            # in standby it stays frozen for hours — normal for the API path.
+            # (The old Selenium check was for a stuck browser session.)
 
             now = datetime.datetime.now()
             data["Timestamp"] = now
@@ -128,9 +122,9 @@ def run_scrape_session(client: mqtt.Client, host: str, on_cycle_ok=None) -> None
             publish_status(
                 client,
                 f"Loop {loop}, {len(data)} items sent from {host}, "
-                f"delay={control['delay']}s, refresh_check={stale_count}",
+                f"delay={control['delay']}s",
             )
-            print(f"Loop {loop} OK, {len(data)} items")
+            print(f"Loop {loop} OK, {len(data)} items", flush=True)
             if on_cycle_ok:
                 on_cycle_ok()
 

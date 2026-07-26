@@ -756,7 +756,7 @@ class PortalApiClient:
                 return 0
 
         if mqtt_key == "Zustand seit":
-            # Keep a changing stamp for app.py stale detection (ISO ok).
+            # Absolute last-state-change stamp from portal (may stay fixed for hours).
             return str(raw).replace("T", " ").replace("Z", "")
 
         if isinstance(raw, float):
