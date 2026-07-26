@@ -29,9 +29,16 @@ control = {
 }
 
 
+LWT_TOPIC = "swisstherm/LWT"
+LWT_ONLINE = "online"
+LWT_OFFLINE = "offline"
+
+
 def on_connect(client, userdata, flags, reason_code, properties=None):
     # Compatible with paho-mqtt 2.x CallbackAPIVersion.VERSION2
     print(f"MQTT connected with result code {reason_code}")
+    # Birth message (retained). Broker publishes LWT_OFFLINE on unclean disconnect.
+    client.publish(LWT_TOPIC, payload=LWT_ONLINE, qos=1, retain=True)
     client.subscribe("swisstherm/control/#")
 
 
@@ -56,11 +63,17 @@ def publish_status(client, payload: str) -> None:
     client.publish("swisstherm/status", payload=payload)
 
 
+def publish_lwt(client, payload: str) -> None:
+    client.publish(LWT_TOPIC, payload=payload, qos=1, retain=True)
+
+
 def create_mqtt_client() -> mqtt.Client:
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect
     client.on_message = on_message
     client.username_pw_set(secrets.mqtt_user, password=secrets.mqtt_pwd)
+    # If the process dies or the TCP session drops, the broker publishes offline.
+    client.will_set(LWT_TOPIC, payload=LWT_OFFLINE, qos=1, retain=True)
     client.connect(secrets.mqtt_host, secrets.mqtt_port, 60)
     client.loop_start()
     return client
@@ -196,6 +209,9 @@ def main() -> int:
             client,
             f"Notify: Abruf Swisstherm-Heizkreisdaten von {host} wurde beendet.",
         )
+        # Clean shutdown: clear LWT ourselves (broker would not fire will).
+        publish_lwt(client, LWT_OFFLINE)
+        time.sleep(0.2)  # let the offline publish flush
         client.loop_stop()
         client.disconnect()
 

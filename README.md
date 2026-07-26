@@ -35,6 +35,7 @@ Counter page UUIDs come from `secrets.portal_datapath_energy` (same URLs as befo
 - `swisstherm/control/onoff` — `stop` / `restart`
 - `swisstherm/control/zaehler` — `get` triggers energy-counter fetch
 - `swisstherm/status` — status text (`Notify: …` forwarded by Home Assistant)
+- `swisstherm/LWT` — retained `online` / `offline` (MQTT last will; scraper process up)
 - `swisstherm/zaehler/json` — energy-counter JSON payload
 
 ## Home Assistant (MQTT examples)

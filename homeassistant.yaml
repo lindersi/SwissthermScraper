@@ -218,11 +218,13 @@ mqtt:
     device:
       identifiers: [swisstherm]
   binary_sensor:
-  - name: Swisstherm online
+  # Scraper MQTT session (LWT). on = process connected; off = stopped/crashed.
+  # For "data still flowing", rely on expire_after on live sensors instead.
+  - name: online
     unique_id: swisstherm_online
-    state_topic: swisstherm/Timestamp
-    value_template: "{{ true }}"
-    expire_after: 600
+    state_topic: swisstherm/LWT
+    payload_on: online
+    payload_off: offline
     device_class: connectivity
     device:
       identifiers: [swisstherm]
