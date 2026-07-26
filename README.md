@@ -37,6 +37,37 @@ Counter page UUIDs come from `secrets.portal_datapath_energy` (same URLs as befo
 - `swisstherm/status` — status text (`Notify: …` forwarded by Home Assistant)
 - `swisstherm/zaehler/json` — energy-counter JSON payload
 
+## Home Assistant (MQTT examples)
+
+Minimal `mqtt:` snippets. With a shared `device:`, keep entity `name` / `object_id` **without** a `Swisstherm` prefix — otherwise entity IDs become `sensor.swisstherm_swisstherm_…`. Use `float(default=none)` so bad payloads become `unknown` instead of a fake `0`. Live topics use `expire_after`; Zähler JSON has no expiry (on-demand).
+
+```yaml
+mqtt:
+  sensor:
+  - name: Vorlauf Ist
+    unique_id: swisstherm_vorlauf_ist
+    state_topic: swisstherm/Vorlauf Ist
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 600
+    device:  # define once
+      identifiers: [swisstherm]
+      name: Swisstherm
+      manufacturer: PZP / Kermi
+      model: x-center
+
+  - name: Gesamtaufnahme Hz
+    unique_id: swisstherm_gesamtaufnahme_hz
+    state_topic: swisstherm/zaehler/json
+    value_template: "{{ value_json['Leistungsaufnahme Hz'] | float(default=none) }}"
+    unit_of_measurement: kWh
+    device_class: energy
+    state_class: total_increasing
+    device: 
+      identifiers: [swisstherm]
+```
+
 ## Requires
 
 - Python 3.10+ recommended
